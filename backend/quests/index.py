@@ -37,10 +37,16 @@ def handler(event: dict, context) -> dict:
     params = event.get("queryStringParameters") or {}
     body = {}
     if event.get("body"):
-        body = json.loads(event["body"])
+        try:
+            body = json.loads(event["body"])
+        except Exception:
+            body = {}
 
-    conn = get_conn()
-    cur = conn.cursor()
+    try:
+        conn = get_conn()
+        cur = conn.cursor()
+    except Exception as e:
+        return err(f"DB connection failed: {e}", 500)
 
     # GET / — все ветки с квестами
     if method == "GET" and path in ("/", ""):

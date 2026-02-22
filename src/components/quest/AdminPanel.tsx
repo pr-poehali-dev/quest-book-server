@@ -17,11 +17,23 @@ interface AdminPanelProps {
 export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: AdminPanelProps) {
   const [activeTab, setActiveTab] = useState<AdminTab>("quests");
   const [tgStatus, setTgStatus] = useState<"idle" | "loading" | "ok" | "err">("idle");
+  const [tgError, setTgError] = useState<string | null>(null);
 
   const setupTelegram = async () => {
     setTgStatus("loading");
-    const res = await apiFetch("/tgsetup", { method: "POST" }, adminKey);
-    setTgStatus(res?.webhook_set ? "ok" : "err");
+    setTgError(null);
+    try {
+      const res = await apiFetch("/tgsetup", { method: "POST" }, adminKey);
+      if (res?.webhook_set) {
+        setTgStatus("ok");
+      } else {
+        setTgStatus("err");
+        setTgError(res?.error ?? "Проверь TELEGRAM_BOT_TOKEN в секретах");
+      }
+    } catch {
+      setTgStatus("err");
+      setTgError("Нет соединения с сервером");
+    }
   };
 
   const [activeBranch, setActiveBranch] = useState<Branch | null>(branches[0] ?? null);
@@ -130,7 +142,9 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
         <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: "hsl(var(--border))" }}>
           <div>
             <h2 className="font-cinzel text-sm font-bold" style={{ color: "hsl(var(--quest-gold))" }}>Админка</h2>
-            <p className="font-crimson text-xs text-muted-foreground">Управление квестами</p>
+            <p className="font-crimson text-xs text-muted-foreground">
+              {tgStatus === "ok" ? "✅ Telegram подключён" : tgStatus === "err" && tgError ? `⚠️ ${tgError}` : "Управление квестами"}
+            </p>
           </div>
           <div className="flex items-center gap-1">
             <button
