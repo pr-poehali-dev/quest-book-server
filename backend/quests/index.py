@@ -310,13 +310,13 @@ def handler(event: dict, context) -> dict:
 
         return ok({"success": True, "url": cdn_url})
 
-    # GET /tg/setup — регистрирует webhook у Telegram (открыть один раз в браузере)
-    if method == "GET" and path == "/tg/setup":
+    # GET /tgsetup — регистрирует webhook у Telegram (открыть один раз в браузере)
+    if method == "GET" and path == "/tgsetup":
         import urllib.request
         tg_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
         if not tg_token:
             return err("TELEGRAM_BOT_TOKEN not set")
-        webhook_url = f"https://functions.poehali.dev/2f2c6c49-83e3-4b16-a65e-e7568c82acd4/tg/callback"
+        webhook_url = f"https://functions.poehali.dev/2f2c6c49-83e3-4b16-a65e-e7568c82acd4/tgcallback"
         payload = json.dumps({"url": webhook_url}).encode()
         req = urllib.request.Request(
             f"https://api.telegram.org/bot{tg_token}/setWebhook",
@@ -330,8 +330,8 @@ def handler(event: dict, context) -> dict:
         except Exception as e:
             return err(f"Failed to set webhook: {e}")
 
-    # POST /tg/callback — webhook от Telegram (нажатие кнопок Принять/Отклонить)
-    if method == "POST" and path == "/tg/callback":
+    # POST /tgcallback — webhook от Telegram (нажатие кнопок Принять/Отклонить)
+    if method == "POST" and path == "/tgcallback":
         import urllib.request
         tg_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
         update = body
