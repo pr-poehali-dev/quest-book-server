@@ -168,7 +168,45 @@ def handler(event: dict, context) -> dict:
         cur.execute(f"UPDATE {SCHEMA}.quests SET archived=TRUE WHERE id=%s", (body.get("id"),))
         return ok({"success": True})
 
-    # POST /proof — загрузка доказательства выполнения квеста
+    # POST /proof/presign — получить presigned URL для загрузки файла напрямую в S3
+    if method == "POST" and path == "/proof/presign":
+        import boto3
+        import uuid
+        nick = body.get("nick", "").strip()
+        quest_id = body.get("quest_id")
+        quest_title = body.get("quest_title", "")
+        file_name = body.get("file_name", "proof.jpg")
+        file_type = body.get("file_type", "image/jpeg")
+
+        if not nick or not quest_id:
+            return err("nick and quest_id required")
+
+        ext = file_name.rsplit(".", 1)[-1] if "." in file_name else "bin"
+        key = f"quest-proofs/{quest_id}/{uuid.uuid4()}.{ext}"
+
+        s3 = boto3.client(
+            "s3",
+            endpoint_url="https://bucket.poehali.dev",
+            aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
+            aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
+        )
+        presigned_url = s3.generate_presigned_url(
+            "put_object",
+            Params={"Bucket": "files", "Key": key, "ContentType": file_type},
+            ExpiresIn=300,
+        )
+        cdn_url = f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/files/{key}"
+
+        # Сохраняем заявку сразу — статус pending
+        cur.execute(f"""
+            INSERT INTO {SCHEMA}.player_progress (player_nick, quest_id, proof_url, status)
+            VALUES (%s, %s, %s, 'pending')
+            ON CONFLICT (player_nick, quest_id) DO UPDATE SET proof_url = EXCLUDED.proof_url, status = 'pending'
+        """, (nick, quest_id, cdn_url))
+
+        return ok({"upload_url": presigned_url, "cdn_url": cdn_url, "key": key})
+
+    # POST /proof — загрузка доказательства выполнения квеста (legacy, base64)
     if method == "POST" and path == "/proof":
         nick = body.get("nick", "").strip()
         quest_id = body.get("quest_id")

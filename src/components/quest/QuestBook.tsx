@@ -91,25 +91,33 @@ const QuestModal = ({ quest, player, onClose, onComplete }: {
     if (f) setPreview(URL.createObjectURL(f));
   };
 
-  // Сжимает изображение до base64 не тяжелее ~700 КБ
+  // Сжимает изображение пока base64 не будет < 600 КБ
   const compressImage = (f: File): Promise<{ base64: string; type: string; name: string }> =>
     new Promise((resolve, reject) => {
       const img = new Image();
       const url = URL.createObjectURL(f);
       img.onload = () => {
         URL.revokeObjectURL(url);
-        const MAX = 1000;
-        let { width, height } = img;
-        if (width > MAX || height > MAX) {
-          const ratio = Math.min(MAX / width, MAX / height);
-          width = Math.round(width * ratio);
-          height = Math.round(height * ratio);
-        }
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+        const tryCompress = (maxSize: number, quality: number) => {
+          let { width, height } = img;
+          if (width > maxSize || height > maxSize) {
+            const ratio = Math.min(maxSize / width, maxSize / height);
+            width = Math.round(width * ratio);
+            height = Math.round(height * ratio);
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+          return canvas.toDataURL("image/jpeg", quality);
+        };
+
+        // Пробуем с убывающим качеством пока не влезет в 600 КБ
+        let dataUrl = tryCompress(1200, 0.85);
+        if (dataUrl.length > 800_000) dataUrl = tryCompress(800, 0.75);
+        if (dataUrl.length > 800_000) dataUrl = tryCompress(600, 0.65);
+        if (dataUrl.length > 800_000) dataUrl = tryCompress(400, 0.55);
+
         resolve({ base64: dataUrl.split(",")[1], type: "image/jpeg", name: f.name.replace(/\.[^.]+$/, ".jpg") });
       };
       img.onerror = reject;
@@ -121,44 +129,47 @@ const QuestModal = ({ quest, player, onClose, onComplete }: {
     setUploading(true);
     setError(null);
     try {
-      let base64: string, fileType: string, fileName: string;
+      let uploadFile: File | Blob = file;
+      let fileType = file.type;
+      let fileName = file.name;
 
-      if (file.type.startsWith("video/")) {
-        // Видео — отправляем как есть, но проверяем размер
-        if (file.size > 5 * 1024 * 1024) {
-          setError("Видео слишком большое. Максимум 5 МБ.");
-          return;
-        }
-        base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve((reader.result as string).split(",")[1]);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-        fileType = file.type;
-        fileName = file.name;
-      } else {
-        // Изображение — сжимаем
+      // Для изображений — сжимаем через canvas
+      if (!file.type.startsWith("video/")) {
         const compressed = await compressImage(file);
-        base64 = compressed.base64;
+        const binary = atob(compressed.base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        uploadFile = new Blob([bytes], { type: compressed.type });
         fileType = compressed.type;
         fileName = compressed.name;
       }
 
-      const res = await apiFetch("/proof", {
+      // Шаг 1: получаем presigned URL от нашего бэкенда
+      const presignRes = await apiFetch("/proof/presign", {
         method: "POST",
         body: JSON.stringify({
           nick: player,
           quest_id: quest.id,
           quest_title: quest.title,
-          file_base64: base64,
           file_name: fileName,
           file_type: fileType,
         }),
       });
 
-      if (res?.error) {
-        setError("Ошибка сервера: " + res.error);
+      if (presignRes?.error) {
+        setError("Ошибка: " + presignRes.error);
+        return;
+      }
+
+      // Шаг 2: загружаем файл напрямую в S3 (без лимитов gateway)
+      const uploadRes = await fetch(presignRes.upload_url, {
+        method: "PUT",
+        headers: { "Content-Type": fileType },
+        body: uploadFile,
+      });
+
+      if (!uploadRes.ok) {
+        setError("Не удалось загрузить файл. Попробуй снова.");
         return;
       }
 
