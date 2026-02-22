@@ -202,7 +202,48 @@ def handler(event: dict, context) -> dict:
             INSERT INTO {SCHEMA}.player_progress (player_nick, quest_id, proof_url, status)
             VALUES (%s, %s, %s, 'pending')
             ON CONFLICT (player_nick, quest_id) DO UPDATE SET proof_url = EXCLUDED.proof_url, status = 'pending'
+            RETURNING id
         """, (nick, quest_id, cdn_url))
+        proof_id = cur.fetchone()[0]
+
+        # Telegram уведомление с кнопками Принять / Отклонить
+        tg_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+        tg_chat = os.environ.get("TELEGRAM_CHAT_ID", "")
+        if tg_token and tg_chat:
+            import urllib.request
+            rarity_emoji = {"common": "⚪", "rare": "🔵", "epic": "🟣"}.get("common", "⭐")
+            # Получим редкость квеста
+            cur.execute(f"SELECT rarity FROM {SCHEMA}.quests WHERE id = %s", (quest_id,))
+            qrow = cur.fetchone()
+            if qrow:
+                rarity_emoji = {"common": "⚪", "rare": "🔵", "epic": "🟣"}.get(qrow[0], "⭐")
+            is_video = file_type.startswith("video/")
+            text = (
+                f"📋 *Новая заявка на квест*\n\n"
+                f"👤 Игрок: *{nick}*\n"
+                f"⚔️ Квест: *{quest_title}*\n"
+                f"{rarity_emoji} Редкость\n\n"
+                f"{'🎥' if is_video else '🖼'} [Открыть доказательство]({cdn_url})"
+            )
+            keyboard = {"inline_keyboard": [[
+                {"text": "✅ Принять", "callback_data": f"approve:{proof_id}"},
+                {"text": "❌ Отклонить", "callback_data": f"reject:{proof_id}"},
+            ]]}
+            payload = json.dumps({
+                "chat_id": tg_chat,
+                "text": text,
+                "parse_mode": "Markdown",
+                "reply_markup": keyboard,
+            }).encode()
+            req = urllib.request.Request(
+                f"https://api.telegram.org/bot{tg_token}/sendMessage",
+                data=payload,
+                headers={"Content-Type": "application/json"},
+            )
+            try:
+                urllib.request.urlopen(req, timeout=5)
+            except Exception:
+                pass
 
         return ok({"upload_url": presigned_url, "cdn_url": cdn_url, "key": key})
 
@@ -268,6 +309,93 @@ def handler(event: dict, context) -> dict:
                 pass
 
         return ok({"success": True, "url": cdn_url})
+
+    # GET /tg/setup — регистрирует webhook у Telegram (открыть один раз в браузере)
+    if method == "GET" and path == "/tg/setup":
+        import urllib.request
+        tg_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+        if not tg_token:
+            return err("TELEGRAM_BOT_TOKEN not set")
+        webhook_url = f"https://functions.poehali.dev/2f2c6c49-83e3-4b16-a65e-e7568c82acd4/tg/callback"
+        payload = json.dumps({"url": webhook_url}).encode()
+        req = urllib.request.Request(
+            f"https://api.telegram.org/bot{tg_token}/setWebhook",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            resp = urllib.request.urlopen(req, timeout=10)
+            result = json.loads(resp.read())
+            return ok({"webhook_set": True, "telegram_response": result})
+        except Exception as e:
+            return err(f"Failed to set webhook: {e}")
+
+    # POST /tg/callback — webhook от Telegram (нажатие кнопок Принять/Отклонить)
+    if method == "POST" and path == "/tg/callback":
+        import urllib.request
+        tg_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+        update = body
+        callback = update.get("callback_query")
+        if not callback:
+            return ok({"ok": True})
+
+        callback_id = callback["id"]
+        chat_id = callback["message"]["chat"]["id"]
+        message_id = callback["message"]["message_id"]
+        data = callback.get("data", "")
+
+        if ":" not in data:
+            return ok({"ok": True})
+
+        action, proof_id_str = data.split(":", 1)
+        proof_id = int(proof_id_str)
+        new_status = "approved" if action == "approve" else "rejected"
+
+        cur.execute(f"""
+            UPDATE {SCHEMA}.player_progress SET status = %s WHERE id = %s
+            RETURNING player_nick, quest_id
+        """, (new_status, proof_id))
+        row = cur.fetchone()
+
+        if row:
+            label = "✅ Принято" if new_status == "approved" else "❌ Отклонено"
+            # Обновляем сообщение — убираем кнопки, ставим статус
+            cur.execute(f"SELECT title FROM {SCHEMA}.quests WHERE id = %s", (row[1],))
+            qt = cur.fetchone()
+            new_text = (
+                f"{label}\n\n"
+                f"👤 Игрок: *{row[0]}*\n"
+                f"⚔️ Квест: *{qt[0] if qt else '—'}*"
+            )
+            edit_payload = json.dumps({
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "text": new_text,
+                "parse_mode": "Markdown",
+            }).encode()
+            req = urllib.request.Request(
+                f"https://api.telegram.org/bot{tg_token}/editMessageText",
+                data=edit_payload,
+                headers={"Content-Type": "application/json"},
+            )
+            try:
+                urllib.request.urlopen(req, timeout=5)
+            except Exception:
+                pass
+
+        # Ответ на callback (убирает спиннер у кнопки)
+        ack_payload = json.dumps({"callback_query_id": callback_id}).encode()
+        ack_req = urllib.request.Request(
+            f"https://api.telegram.org/bot{tg_token}/answerCallbackQuery",
+            data=ack_payload,
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            urllib.request.urlopen(ack_req, timeout=5)
+        except Exception:
+            pass
+
+        return ok({"ok": True})
 
     # ADMIN: GET /proofs — список заявок на проверку
     if method == "GET" and path == "/proofs":
