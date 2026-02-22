@@ -101,6 +101,13 @@ interface AdminPanelProps {
 
 export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: AdminPanelProps) {
   const [activeTab, setActiveTab] = useState<AdminTab>("quests");
+  const [tgStatus, setTgStatus] = useState<"idle" | "loading" | "ok" | "err">("idle");
+
+  const setupTelegram = async () => {
+    setTgStatus("loading");
+    const res = await apiFetch("/tgsetup", { method: "POST" }, adminKey);
+    setTgStatus(res?.webhook_set ? "ok" : "err");
+  };
   const [activeBranch, setActiveBranch] = useState<Branch | null>(branches[0] ?? null);
   const [editingQuest, setEditingQuest] = useState<Quest | null>(null);
   const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
@@ -214,9 +221,22 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
             <h2 className="font-cinzel text-sm font-bold" style={{ color: "hsl(var(--quest-gold))" }}>Админка</h2>
             <p className="font-crimson text-xs text-muted-foreground">Управление квестами</p>
           </div>
-          <button className="p-1.5 rounded hover:bg-secondary" onClick={onClose}>
-            <Icon name="X" size={16} color="hsl(var(--muted-foreground))" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              title={tgStatus === "ok" ? "Telegram подключён" : "Подключить Telegram-уведомления"}
+              className="p-1.5 rounded hover:bg-secondary transition-colors"
+              onClick={setupTelegram}
+              disabled={tgStatus === "loading"}>
+              <Icon
+                name={tgStatus === "ok" ? "CheckCircle" : tgStatus === "err" ? "AlertCircle" : "Send"}
+                size={15}
+                color={tgStatus === "ok" ? "#27ae60" : tgStatus === "err" ? "hsl(var(--destructive))" : "hsl(var(--quest-gold))"}
+              />
+            </button>
+            <button className="p-1.5 rounded hover:bg-secondary" onClick={onClose}>
+              <Icon name="X" size={16} color="hsl(var(--muted-foreground))" />
+            </button>
+          </div>
         </div>
 
         {/* Tab switcher */}

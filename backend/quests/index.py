@@ -310,8 +310,10 @@ def handler(event: dict, context) -> dict:
 
         return ok({"success": True, "url": cdn_url})
 
-    # GET /tgsetup — регистрирует webhook у Telegram (открыть один раз в браузере)
-    if method == "GET" and path == "/tgsetup":
+    # POST /tgsetup — регистрирует webhook у Telegram
+    if method == "POST" and path == "/tgsetup":
+        if not is_admin(event):
+            return err("unauthorized", 401)
         import urllib.request
         tg_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
         if not tg_token:
