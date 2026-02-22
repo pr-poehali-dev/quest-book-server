@@ -1,5 +1,5 @@
 """
-API для управления квестами: получение веток/квестов, прогресс игроков, CRUD для админа.
+API для управления квестами: ветки, квесты, прогресс игроков, CRUD для админа.
 """
 import json
 import os
@@ -10,7 +10,7 @@ SCHEMA = os.environ.get("MAIN_DB_SCHEMA", "t_p88778265_quest_book_server")
 CORS = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, X-Admin-Key, X-User-Id, X-Auth-Token, X-Session-Id, Authorization",
+    "Access-Control-Allow-Headers": "Content-Type, X-Admin-Key",
     "Access-Control-Max-Age": "86400",
 }
 
@@ -26,10 +26,11 @@ def err(msg, status=400):
     return {"statusCode": status, "headers": {**CORS, "Content-Type": "application/json"}, "body": json.dumps({"error": msg})}
 
 def is_admin(event):
-    key = event.get("headers", {}).get("X-Admin-Key", "")
+    key = (event.get("headers") or {}).get("X-Admin-Key", "")
     return key == os.environ.get("ADMIN_KEY", "")
 
 def handler(event: dict, context) -> dict:
+    """API квестовой книги — ветки, квесты, прогресс, админка."""
     if event.get("httpMethod") == "OPTIONS":
         return {"statusCode": 200, "headers": CORS, "body": ""}
 
@@ -75,42 +76,9 @@ def handler(event: dict, context) -> dict:
         nick = params.get("nick", "").strip()
         if not nick:
             return err("nick required")
-        cur.execute(f"SELECT quest_id FROM {SCHEMA}.player_progress WHERE player_nick = %s", (nick,))
+        cur.execute(f"SELECT quest_id FROM {SCHEMA}.player_progress WHERE player_nick = %s AND status = 'approved'", (nick,))
         ids = [row[0] for row in cur.fetchall()]
         return ok({"nick": nick, "completed_quest_ids": ids})
-
-    # POST /progress — выполнить квест
-    if method == "POST" and path == "/progress":
-        nick = body.get("nick", "").strip()
-        quest_id = body.get("quest_id")
-        if not nick or not quest_id:
-            return err("nick and quest_id required")
-        cur.execute(f"SELECT id FROM {SCHEMA}.quests WHERE id = %s AND archived = FALSE", (quest_id,))
-        if not cur.fetchone():
-            return err("quest not found", 404)
-        cur.execute(f"""
-            INSERT INTO {SCHEMA}.player_progress (player_nick, quest_id)
-            VALUES (%s, %s) ON CONFLICT DO NOTHING
-        """, (nick, quest_id))
-        cur.execute(f"SELECT title, xp, rarity FROM {SCHEMA}.quests WHERE id = %s", (quest_id,))
-        q = cur.fetchone()
-
-        webhook_url = os.environ.get("DISCORD_WEBHOOK_URL", "")
-        if webhook_url and q:
-            import urllib.request
-            rarity_emoji = {"common": "⚪", "rare": "🔵", "epic": "🟣"}.get(q[2], "⭐")
-            payload = json.dumps({"embeds": [{"title": "Квест выполнен!", "color": 0xF0C040, "fields": [
-                {"name": "Игрок", "value": f"**{nick}**", "inline": True},
-                {"name": "Квест", "value": f"{rarity_emoji} {q[0]}", "inline": True},
-                {"name": "Опыт", "value": f"+{q[1]} XP", "inline": True},
-            ], "footer": {"text": "Quest Book Server"}}]}).encode()
-            req = urllib.request.Request(webhook_url, data=payload, headers={"Content-Type": "application/json"})
-            try:
-                urllib.request.urlopen(req, timeout=3)
-            except Exception:
-                pass
-
-        return ok({"success": True, "quest_title": q[0] if q else "", "xp": q[1] if q else 0})
 
     # ADMIN: POST /branches
     if method == "POST" and path == "/branches":
@@ -175,299 +143,66 @@ def handler(event: dict, context) -> dict:
         cur.execute(f"UPDATE {SCHEMA}.quests SET archived=TRUE WHERE id=%s", (body.get("id"),))
         return ok({"success": True})
 
-    # POST /proof/presign — получить presigned URL для загрузки файла напрямую в S3
-    if method == "POST" and path == "/proof/presign":
-        import boto3
-        import uuid
-        nick = body.get("nick", "").strip()
-        quest_id = body.get("quest_id")
-        quest_title = body.get("quest_title", "")
-        file_name = body.get("file_name", "proof.jpg")
-        file_type = body.get("file_type", "image/jpeg")
-
-        if not nick or not quest_id:
-            return err("nick and quest_id required")
-
-        ext = file_name.rsplit(".", 1)[-1] if "." in file_name else "bin"
-        key = f"quest-proofs/{quest_id}/{uuid.uuid4()}.{ext}"
-
-        s3 = boto3.client(
-            "s3",
-            endpoint_url="https://bucket.poehali.dev",
-            aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
-            aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
-        )
-        presigned_url = s3.generate_presigned_url(
-            "put_object",
-            Params={"Bucket": "files", "Key": key, "ContentType": file_type},
-            ExpiresIn=300,
-        )
-        cdn_url = f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/files/{key}"
-
-        # Сохраняем заявку сразу — статус pending
-        cur.execute(f"""
-            INSERT INTO {SCHEMA}.player_progress (player_nick, quest_id, proof_url, status)
-            VALUES (%s, %s, %s, 'pending')
-            ON CONFLICT (player_nick, quest_id) DO UPDATE SET proof_url = EXCLUDED.proof_url, status = 'pending'
-            RETURNING id
-        """, (nick, quest_id, cdn_url))
-        proof_id = cur.fetchone()[0]
-
-        # Telegram уведомление с кнопками Принять / Отклонить
-        tg_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-        tg_chat = os.environ.get("TELEGRAM_CHAT_ID", "")
-        if tg_token and tg_chat:
-            import urllib.request
-            rarity_emoji = {"common": "⚪", "rare": "🔵", "epic": "🟣"}.get("common", "⭐")
-            # Получим редкость квеста
-            cur.execute(f"SELECT rarity FROM {SCHEMA}.quests WHERE id = %s", (quest_id,))
-            qrow = cur.fetchone()
-            if qrow:
-                rarity_emoji = {"common": "⚪", "rare": "🔵", "epic": "🟣"}.get(qrow[0], "⭐")
-            is_video = file_type.startswith("video/")
-            text = (
-                f"📋 *Новая заявка на квест*\n\n"
-                f"👤 Игрок: *{nick}*\n"
-                f"⚔️ Квест: *{quest_title}*\n"
-                f"{rarity_emoji} Редкость\n\n"
-                f"{'🎥' if is_video else '🖼'} [Открыть доказательство]({cdn_url})"
-            )
-            keyboard = {"inline_keyboard": [[
-                {"text": "✅ Принять", "callback_data": f"approve:{proof_id}"},
-                {"text": "❌ Отклонить", "callback_data": f"reject:{proof_id}"},
-            ]]}
-            payload = json.dumps({
-                "chat_id": tg_chat,
-                "text": text,
-                "parse_mode": "Markdown",
-                "reply_markup": keyboard,
-            }).encode()
-            req = urllib.request.Request(
-                f"https://api.telegram.org/bot{tg_token}/sendMessage",
-                data=payload,
-                headers={"Content-Type": "application/json"},
-            )
-            try:
-                urllib.request.urlopen(req, timeout=5)
-            except Exception:
-                pass
-
-        return ok({"upload_url": presigned_url, "cdn_url": cdn_url, "key": key})
-
-    # POST /proof — загрузка доказательства выполнения квеста (legacy, base64)
-    if method == "POST" and path == "/proof":
-        nick = body.get("nick", "").strip()
-        quest_id = body.get("quest_id")
-        quest_title = body.get("quest_title", "")
-        file_base64 = body.get("file_base64", "")
-        file_name = body.get("file_name", "proof.png")
-        file_type = body.get("file_type", "image/png")
-
-        if not file_base64:
-            return err("file_base64 required")
-
-        import base64
-        import boto3
-        import uuid
-
-        file_data = base64.b64decode(file_base64)
-        ext = file_name.rsplit(".", 1)[-1] if "." in file_name else "bin"
-        key = f"quest-proofs/{quest_id}/{uuid.uuid4()}.{ext}"
-
-        s3 = boto3.client(
-            "s3",
-            endpoint_url="https://bucket.poehali.dev",
-            aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
-            aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
-        )
-        s3.put_object(Bucket="files", Key=key, Body=file_data, ContentType=file_type)
-        cdn_url = f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/files/{key}"
-
-        # Сохраняем прогресс со статусом pending (ждёт одобрения)
-        if nick and quest_id:
-            cur.execute(f"""
-                INSERT INTO {SCHEMA}.player_progress (player_nick, quest_id, proof_url, status)
-                VALUES (%s, %s, %s, 'pending')
-                ON CONFLICT (player_nick, quest_id) DO UPDATE SET proof_url = EXCLUDED.proof_url, status = 'pending'
-            """, (nick, quest_id, cdn_url))
-
-        # Discord уведомление со ссылкой на файл
-        webhook_url = os.environ.get("DISCORD_WEBHOOK_URL", "")
-        if webhook_url:
-            import urllib.request
-            is_video = file_type.startswith("video/")
-            embed = {
-                "title": "📋 Доказательство выполнения",
-                "color": 0xF0C040,
-                "fields": [
-                    {"name": "Игрок", "value": f"**{nick}**", "inline": True},
-                    {"name": "Квест", "value": quest_title, "inline": True},
-                    {"name": "Файл", "value": f"[Открыть {'видео' if is_video else 'скриншот'}]({cdn_url})", "inline": False},
-                ],
-                "footer": {"text": "Quest Book Server"},
-            }
-            if not is_video:
-                embed["image"] = {"url": cdn_url}
-            payload = json.dumps({"embeds": [embed]}).encode()
-            req = urllib.request.Request(webhook_url, data=payload, headers={"Content-Type": "application/json"})
-            try:
-                urllib.request.urlopen(req, timeout=5)
-            except Exception:
-                pass
-
-        return ok({"success": True, "url": cdn_url})
-
-    # POST /tgsetup — регистрирует webhook у Telegram
-    if method == "POST" and path == "/tgsetup":
+    # ADMIN: GET /players — список всех игроков с прогрессом
+    if method == "GET" and path == "/players":
         if not is_admin(event):
             return err("unauthorized", 401)
-        import urllib.request
-        tg_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-        if not tg_token:
-            return err("TELEGRAM_BOT_TOKEN not set")
-        webhook_url = f"https://functions.poehali.dev/2f2c6c49-83e3-4b16-a65e-e7568c82acd4/tgcallback"
-        payload = json.dumps({"url": webhook_url}).encode()
-        req = urllib.request.Request(
-            f"https://api.telegram.org/bot{tg_token}/setWebhook",
-            data=payload,
-            headers={"Content-Type": "application/json"},
-        )
-        try:
-            resp = urllib.request.urlopen(req, timeout=10)
-            result = json.loads(resp.read())
-            return ok({"webhook_set": True, "telegram_response": result})
-        except Exception as e:
-            return err(f"Failed to set webhook: {e}")
-
-    # POST /tgcallback — webhook от Telegram (нажатие кнопок Принять/Отклонить)
-    if method == "POST" and path == "/tgcallback":
-        import urllib.request
-        tg_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-        update = body
-        callback = update.get("callback_query")
-        if not callback:
-            return ok({"ok": True})
-
-        callback_id = callback["id"]
-        chat_id = callback["message"]["chat"]["id"]
-        message_id = callback["message"]["message_id"]
-        data = callback.get("data", "")
-
-        if ":" not in data:
-            return ok({"ok": True})
-
-        action, proof_id_str = data.split(":", 1)
-        proof_id = int(proof_id_str)
-        new_status = "approved" if action == "approve" else "rejected"
-
         cur.execute(f"""
-            UPDATE {SCHEMA}.player_progress SET status = %s WHERE id = %s
-            RETURNING player_nick, quest_id
-        """, (new_status, proof_id))
-        row = cur.fetchone()
-
-        if row:
-            label = "✅ Принято" if new_status == "approved" else "❌ Отклонено"
-            # Обновляем сообщение — убираем кнопки, ставим статус
-            cur.execute(f"SELECT title FROM {SCHEMA}.quests WHERE id = %s", (row[1],))
-            qt = cur.fetchone()
-            new_text = (
-                f"{label}\n\n"
-                f"👤 Игрок: *{row[0]}*\n"
-                f"⚔️ Квест: *{qt[0] if qt else '—'}*"
-            )
-            edit_payload = json.dumps({
-                "chat_id": chat_id,
-                "message_id": message_id,
-                "text": new_text,
-                "parse_mode": "Markdown",
-            }).encode()
-            req = urllib.request.Request(
-                f"https://api.telegram.org/bot{tg_token}/editMessageText",
-                data=edit_payload,
-                headers={"Content-Type": "application/json"},
-            )
-            try:
-                urllib.request.urlopen(req, timeout=5)
-            except Exception:
-                pass
-
-        # Ответ на callback (убирает спиннер у кнопки)
-        ack_payload = json.dumps({"callback_query_id": callback_id}).encode()
-        ack_req = urllib.request.Request(
-            f"https://api.telegram.org/bot{tg_token}/answerCallbackQuery",
-            data=ack_payload,
-            headers={"Content-Type": "application/json"},
-        )
-        try:
-            urllib.request.urlopen(ack_req, timeout=5)
-        except Exception:
-            pass
-
-        return ok({"ok": True})
-
-    # ADMIN: GET /proofs — список заявок на проверку
-    if method == "GET" and path == "/proofs":
-        if not is_admin(event):
-            return err("unauthorized", 401)
-        status_filter = params.get("status", "pending")
-        cur.execute(f"""
-            SELECT pp.id, pp.player_nick, pp.quest_id, pp.proof_url, pp.status, pp.completed_at,
-                   q.title as quest_title, q.xp, q.rarity, q.icon
+            SELECT pp.player_nick,
+                   COUNT(*) FILTER (WHERE pp.status = 'approved') as completed,
+                   COALESCE(SUM(q.xp) FILTER (WHERE pp.status = 'approved'), 0) as total_xp,
+                   MAX(pp.completed_at) as last_active
             FROM {SCHEMA}.player_progress pp
             JOIN {SCHEMA}.quests q ON q.id = pp.quest_id
-            WHERE pp.status = %s
-            ORDER BY pp.completed_at DESC
-        """, (status_filter,))
+            GROUP BY pp.player_nick
+            ORDER BY total_xp DESC
+        """)
         rows = cur.fetchall()
-        result = [{"id": r[0], "player_nick": r[1], "quest_id": r[2], "proof_url": r[3],
-                   "status": r[4], "completed_at": r[5].isoformat() if r[5] else None,
-                   "quest_title": r[6], "xp": r[7], "rarity": r[8], "icon": r[9]} for r in rows]
+        result = [{"nick": r[0], "completed": r[1], "total_xp": int(r[2]), "last_active": r[3]} for r in rows]
         return ok(result)
 
-    # ADMIN: POST /proofs/approve — одобрить или отклонить заявку
-    if method == "POST" and path == "/proofs/approve":
+    # ADMIN: GET /player-progress?nick=Steve — прогресс конкретного игрока
+    if method == "GET" and path == "/player-progress":
         if not is_admin(event):
             return err("unauthorized", 401)
-        proof_id = body.get("id")
-        action = body.get("action", "approve")  # approve | reject
-        new_status = "approved" if action == "approve" else "rejected"
-        cur.execute(f"UPDATE {SCHEMA}.player_progress SET status = %s WHERE id = %s RETURNING player_nick, quest_id", (new_status, proof_id))
-        row = cur.fetchone()
-        if not row:
-            return err("not found", 404)
-        return ok({"success": True, "status": new_status, "player_nick": row[0], "quest_id": row[1]})
+        nick = params.get("nick", "").strip()
+        if not nick:
+            return err("nick required")
+        cur.execute(f"""
+            SELECT pp.id, pp.quest_id, pp.status, pp.completed_at, q.title, q.xp, q.rarity, q.icon, b.title as branch_title
+            FROM {SCHEMA}.player_progress pp
+            JOIN {SCHEMA}.quests q ON q.id = pp.quest_id
+            JOIN {SCHEMA}.branches b ON b.id = q.branch_id
+            WHERE pp.player_nick = %s
+            ORDER BY pp.completed_at DESC
+        """, (nick,))
+        rows = cur.fetchall()
+        result = [{"id": r[0], "quest_id": r[1], "status": r[2], "completed_at": r[3],
+                   "quest_title": r[4], "xp": r[5], "rarity": r[6], "icon": r[7], "branch_title": r[8]} for r in rows]
+        return ok(result)
 
-    # ADMIN: POST /tgsetup — установить webhook для Telegram-бота
-    if method == "POST" and path == "/tgsetup":
+    # ADMIN: POST /progress — выдать или отозвать квест игроку
+    if method == "POST" and path == "/progress":
         if not is_admin(event):
             return err("unauthorized", 401)
-        tg_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-        if not tg_token:
-            return err("TELEGRAM_BOT_TOKEN не задан в секретах", 400)
-
-        host = (event.get("headers") or {}).get("Host", "")
-        if host:
-            webhook_url = f"https://{host}/tgwebhook"
-        else:
-            return err("Не удалось определить URL сервера", 500)
-
-        import urllib.request
-        payload = json.dumps({"url": webhook_url}).encode()
-        req = urllib.request.Request(
-            f"https://api.telegram.org/bot{tg_token}/setWebhook",
-            data=payload,
-            headers={"Content-Type": "application/json"},
-        )
-        try:
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                tg_resp = json.loads(resp.read())
-        except Exception as e:
-            return err(f"Ошибка запроса к Telegram: {e}", 500)
-
-        if tg_resp.get("ok"):
-            return ok({"webhook_set": True, "webhook_url": webhook_url})
-        else:
-            return ok({"webhook_set": False, "error": tg_resp.get("description", "Telegram ответил ошибкой")})
+        nick = body.get("nick", "").strip()
+        quest_id = body.get("quest_id")
+        action = body.get("action", "grant")
+        if not nick or not quest_id:
+            return err("nick and quest_id required")
+        cur.execute(f"SELECT id FROM {SCHEMA}.quests WHERE id = %s AND archived = FALSE", (quest_id,))
+        if not cur.fetchone():
+            return err("quest not found", 404)
+        if action == "grant":
+            cur.execute(f"""
+                INSERT INTO {SCHEMA}.player_progress (player_nick, quest_id, status)
+                VALUES (%s, %s, 'approved')
+                ON CONFLICT (player_nick, quest_id) DO UPDATE SET status = 'approved'
+            """, (nick, quest_id))
+            return ok({"success": True, "action": "granted"})
+        elif action == "revoke":
+            cur.execute(f"DELETE FROM {SCHEMA}.player_progress WHERE player_nick = %s AND quest_id = %s", (nick, quest_id))
+            return ok({"success": True, "action": "revoked"})
+        return err("action must be grant or revoke")
 
     return err("not found", 404)

@@ -1,8 +1,6 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
-import { Branch, Quest, Rarity, apiFetch } from "./types";
-
-// ─── Small UI ─────────────────────────────────────────────────────────────────
+import { Branch, Quest, Rarity } from "./types";
 
 const RarityBadge = ({ rarity }: { rarity: Rarity }) => {
   const labels = { common: "Обычный", rare: "Редкий", epic: "Эпик" };
@@ -35,8 +33,6 @@ const XPBar = ({ total, earned }: { total: number; earned: number }) => {
     </div>
   );
 };
-
-// ─── Quest Card ───────────────────────────────────────────────────────────────
 
 const QuestCard = ({ quest, onClick }: { quest: Quest; onClick: (q: Quest) => void }) => {
   const status = quest.status ?? "locked";
@@ -71,116 +67,10 @@ const QuestCard = ({ quest, onClick }: { quest: Quest; onClick: (q: Quest) => vo
   );
 };
 
-// ─── Quest Modal ──────────────────────────────────────────────────────────────
-
-const QuestModal = ({ quest, player, onClose, onComplete }: {
+const QuestModal = ({ quest, onClose }: {
   quest: Quest;
-  player: string;
   onClose: () => void;
-  onComplete: (q: Quest) => void;
 }) => {
-  const [file, setFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0] ?? null;
-    setFile(f);
-    setError(null);
-    if (f) setPreview(URL.createObjectURL(f));
-  };
-
-  // Сжимает изображение пока base64 не будет < 600 КБ
-  const compressImage = (f: File): Promise<{ base64: string; type: string; name: string }> =>
-    new Promise((resolve, reject) => {
-      const img = new Image();
-      const url = URL.createObjectURL(f);
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        const tryCompress = (maxSize: number, quality: number) => {
-          let { width, height } = img;
-          if (width > maxSize || height > maxSize) {
-            const ratio = Math.min(maxSize / width, maxSize / height);
-            width = Math.round(width * ratio);
-            height = Math.round(height * ratio);
-          }
-          const canvas = document.createElement("canvas");
-          canvas.width = width;
-          canvas.height = height;
-          canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
-          return canvas.toDataURL("image/jpeg", quality);
-        };
-
-        // Пробуем с убывающим качеством пока не влезет в 600 КБ
-        let dataUrl = tryCompress(1200, 0.85);
-        if (dataUrl.length > 800_000) dataUrl = tryCompress(800, 0.75);
-        if (dataUrl.length > 800_000) dataUrl = tryCompress(600, 0.65);
-        if (dataUrl.length > 800_000) dataUrl = tryCompress(400, 0.55);
-
-        resolve({ base64: dataUrl.split(",")[1], type: "image/jpeg", name: f.name.replace(/\.[^.]+$/, ".jpg") });
-      };
-      img.onerror = reject;
-      img.src = url;
-    });
-
-  const handleSubmit = async () => {
-    if (!file || uploading) return;
-    setUploading(true);
-    setError(null);
-    try {
-      let uploadFile: File | Blob = file;
-      let fileType = file.type;
-      let fileName = file.name;
-
-      // Для изображений — сжимаем через canvas
-      if (!file.type.startsWith("video/")) {
-        const compressed = await compressImage(file);
-        const binary = atob(compressed.base64);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-        uploadFile = new Blob([bytes], { type: compressed.type });
-        fileType = compressed.type;
-        fileName = compressed.name;
-      }
-
-      // Шаг 1: получаем presigned URL от нашего бэкенда
-      const presignRes = await apiFetch("/proof/presign", {
-        method: "POST",
-        body: JSON.stringify({
-          nick: player,
-          quest_id: quest.id,
-          quest_title: quest.title,
-          file_name: fileName,
-          file_type: fileType,
-        }),
-      });
-
-      if (presignRes?.error) {
-        setError("Ошибка: " + presignRes.error);
-        return;
-      }
-
-      // Шаг 2: загружаем файл напрямую в S3 (без лимитов gateway)
-      const uploadRes = await fetch(presignRes.upload_url, {
-        method: "PUT",
-        headers: { "Content-Type": fileType },
-        body: uploadFile,
-      });
-
-      if (!uploadRes.ok) {
-        setError("Не удалось загрузить файл. Попробуй снова.");
-        return;
-      }
-
-      onComplete(quest);
-    } catch {
-      setError("Не удалось отправить. Проверь соединение и попробуй снова.");
-    } finally {
-      setUploading(false);
-    }
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0" style={{ background: "hsl(var(--background) / 0.85)", backdropFilter: "blur(4px)" }} />
@@ -205,70 +95,42 @@ const QuestModal = ({ quest, player, onClose, onComplete }: {
           <p className="font-oswald text-xs mt-1" style={{ color: "hsl(var(--quest-gold))" }}>+{quest.xp} XP</p>
         </div>
 
-        {quest.status === "active" && (
-          <div className="mb-4">
-            <div className="ornament mb-3"><span>ДОКАЗАТЕЛЬСТВО</span></div>
-            <label className="block w-full cursor-pointer">
-              <div className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${file ? "" : "hover:border-gold"}`}
-                style={{ borderColor: file ? "hsl(var(--quest-gold) / 0.6)" : "hsl(var(--border))" }}>
-                {preview ? (
-                  file?.type.startsWith("video/") ? (
-                    <video src={preview} className="max-h-32 mx-auto rounded" controls />
-                  ) : (
-                    <img src={preview} alt="preview" className="max-h-32 mx-auto rounded object-cover" />
-                  )
-                ) : (
-                  <>
-                    <Icon name="Upload" size={24} color="hsl(var(--muted-foreground))" />
-                    <p className="font-oswald text-xs tracking-wider uppercase text-muted-foreground mt-2">Скриншот или видео</p>
-                    <p className="font-crimson text-xs text-muted-foreground mt-1">PNG, JPG (любой размер) · MP4 до 5 МБ</p>
-                  </>
-                )}
-              </div>
-              <input type="file" accept="image/*,video/*" className="hidden" onChange={handleFileChange} />
-            </label>
-            {file && (
-              <p className="font-crimson text-xs text-muted-foreground mt-1.5 truncate">📎 {file.name}</p>
-            )}
-            {error && (
-              <p className="font-crimson text-xs mt-2 text-center" style={{ color: "hsl(var(--destructive))" }}>{error}</p>
-            )}
+        {quest.status === "completed" && (
+          <div className="rounded p-3 mb-4 text-center border" style={{ borderColor: "hsl(var(--quest-green) / 0.4)", background: "hsl(var(--quest-green) / 0.1)" }}>
+            <p className="font-cinzel text-sm font-semibold" style={{ color: "hsl(var(--quest-green-bright))" }}>
+              <Icon name="CheckCircle" size={16} color="hsl(var(--quest-green-bright))" />
+              <span className="ml-2">Квест выполнен</span>
+            </p>
           </div>
         )}
 
-        <div className="flex gap-3">
+        {quest.status === "active" && (
+          <div className="rounded p-3 mb-4 text-center border" style={{ borderColor: "hsl(var(--quest-gold) / 0.3)", background: "hsl(var(--quest-gold) / 0.08)" }}>
+            <p className="font-crimson text-sm" style={{ color: "hsl(var(--quest-gold))" }}>
+              Ожидайте — администратор откроет этот квест когда вы его выполните
+            </p>
+          </div>
+        )}
+
+        <div className="flex">
           <button className="flex-1 py-2.5 rounded border font-oswald text-sm tracking-wider uppercase transition-colors hover:bg-secondary"
             style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }} onClick={onClose}>
             Закрыть
           </button>
-          {quest.status === "active" && (
-            <button
-              className="flex-1 py-2.5 rounded font-cinzel text-sm font-semibold tracking-wider uppercase transition-opacity hover:opacity-90 animate-glow disabled:opacity-40"
-              style={{ background: "hsl(var(--quest-gold))", color: "hsl(var(--primary-foreground))" }}
-              disabled={!file || uploading}
-              onClick={handleSubmit}
-            >
-              {uploading ? "Отправка..." : "✓ Отправить"}
-            </button>
-          )}
         </div>
       </div>
     </div>
   );
 };
 
-// ─── Quest Book (main player view) ───────────────────────────────────────────
-
 interface QuestBookProps {
   player: string;
   branches: Branch[];
   completedIds: number[];
-  onComplete: (quest: Quest) => void;
   onLogout: () => void;
-  notification: string | null;
 }
 
-export default function QuestBook({ player, branches, completedIds, onComplete, onLogout, notification }: QuestBookProps) {
+export default function QuestBook({ player, branches, completedIds, onLogout }: QuestBookProps) {
   const [activeBranchId, setActiveBranchId] = useState<number | null>(branches[0]?.id ?? null);
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null);
 
@@ -297,15 +159,6 @@ export default function QuestBook({ player, branches, completedIds, onComplete, 
 
   return (
     <div className="min-h-screen">
-      {notification && (
-        <div className="fixed top-4 right-4 z-50 animate-slide-in-right parchment-bg border rounded-lg px-4 py-3 flex items-center gap-3 shadow-2xl"
-          style={{ borderColor: "hsl(var(--quest-green) / 0.6)", maxWidth: 320 }}>
-          <Icon name="CheckCircle" size={18} color="hsl(var(--quest-green-bright))" />
-          <span className="font-crimson text-sm">{notification}</span>
-        </div>
-      )}
-
-      {/* Header */}
       <header className="border-b sticky top-0 z-40"
         style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--background) / 0.95)", backdropFilter: "blur(8px)" }}>
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
@@ -335,7 +188,6 @@ export default function QuestBook({ player, branches, completedIds, onComplete, 
         </div>
       </header>
 
-      {/* XP bar */}
       <div className="border-b" style={{ borderColor: "hsl(var(--border))" }}>
         <div className="container mx-auto px-4 py-3 flex items-center gap-4">
           <div className="flex-1"><XPBar total={maxXP} earned={totalXP} /></div>
@@ -345,7 +197,6 @@ export default function QuestBook({ player, branches, completedIds, onComplete, 
         </div>
       </div>
 
-      {/* Branch tabs */}
       <div className="border-b" style={{ borderColor: "hsl(var(--border))" }}>
         <div className="container mx-auto px-4">
           <div className="flex gap-1 py-2 overflow-x-auto">
@@ -368,7 +219,6 @@ export default function QuestBook({ player, branches, completedIds, onComplete, 
         </div>
       </div>
 
-      {/* Content */}
       <main className="container mx-auto px-4 py-6">
         {activeBranch && (
           <>
@@ -441,7 +291,7 @@ export default function QuestBook({ player, branches, completedIds, onComplete, 
       </main>
 
       {activeSelectedQuest && (
-        <QuestModal quest={activeSelectedQuest} player={player} onClose={() => setSelectedQuest(null)} onComplete={onComplete} />
+        <QuestModal quest={activeSelectedQuest} onClose={() => setSelectedQuest(null)} />
       )}
     </div>
   );

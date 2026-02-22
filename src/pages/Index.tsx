@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { apiFetch, Branch, Quest } from "@/components/quest/types";
+import { apiFetch, Branch } from "@/components/quest/types";
 import LoginScreen from "@/components/quest/LoginScreen";
 import AdminPanel from "@/components/quest/AdminPanel";
 import QuestBook from "@/components/quest/QuestBook";
@@ -10,7 +10,6 @@ export default function Index() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [completedIds, setCompletedIds] = useState<number[]>([]);
-  const [notification, setNotification] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadBranches = useCallback(async () => {
@@ -35,19 +34,6 @@ export default function Index() {
   const handleAdmin = (key: string) => {
     setAdminKey(key);
     setShowAdmin(true);
-  };
-
-  const handleComplete = async (quest: Quest) => {
-    if (!player) return;
-    const res = await apiFetch("/progress", {
-      method: "POST",
-      body: JSON.stringify({ nick: player, quest_id: quest.id }),
-    });
-    if (res.success) {
-      setCompletedIds(prev => [...prev, quest.id]);
-      setNotification(`✓ «${quest.title}» выполнено! +${quest.xp} XP`);
-      setTimeout(() => setNotification(null), 3500);
-    }
   };
 
   if (!player && !showAdmin) {
@@ -78,9 +64,7 @@ export default function Index() {
       player={player ?? ""}
       branches={branches}
       completedIds={completedIds}
-      onComplete={handleComplete}
       onLogout={() => setPlayer(null)}
-      notification={notification}
     />
   );
 }
