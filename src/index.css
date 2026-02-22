@@ -4,89 +4,55 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 20 14% 6%;
+    --foreground: 40 30% 88%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 20 12% 9%;
+    --card-foreground: 40 30% 88%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 20 12% 9%;
+    --popover-foreground: 40 30% 88%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 43 74% 58%;
+    --primary-foreground: 20 14% 6%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 20 10% 15%;
+    --secondary-foreground: 40 25% 75%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 20 10% 12%;
+    --muted-foreground: 40 15% 50%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 15 60% 35%;
+    --accent-foreground: 40 30% 88%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 60% 45%;
+    --destructive-foreground: 40 30% 88%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 30 15% 18%;
+    --input: 30 15% 18%;
+    --ring: 43 74% 58%;
 
-    --radius: 0.5rem;
+    --radius: 0.25rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Quest-specific */
+    --quest-gold: 43 74% 58%;
+    --quest-gold-dark: 43 60% 40%;
+    --quest-brown: 20 30% 18%;
+    --quest-brown-light: 20 25% 25%;
+    --quest-green: 120 40% 35%;
+    --quest-green-bright: 120 50% 45%;
+    --quest-red: 0 55% 45%;
+    --quest-parchment: 40 35% 85%;
+    --quest-ink: 220 20% 15%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 20 14% 5%;
+    --sidebar-foreground: 40 25% 75%;
+    --sidebar-primary: 43 74% 58%;
+    --sidebar-primary-foreground: 20 14% 6%;
+    --sidebar-accent: 20 10% 12%;
+    --sidebar-accent-foreground: 40 25% 75%;
+    --sidebar-border: 30 15% 14%;
+    --sidebar-ring: 43 74% 58%;
   }
 }
 
@@ -97,5 +63,201 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: "Crimson Text", Georgia, serif;
+    background-image:
+      radial-gradient(
+        ellipse at 20% 50%,
+        hsl(20 20% 10% / 0.8) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse at 80% 20%,
+        hsl(30 15% 8% / 0.6) 0%,
+        transparent 50%
+      );
   }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--quest-gold-dark));
+  border-radius: 3px;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 8px hsl(var(--quest-gold) / 0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 20px hsl(var(--quest-gold) / 0.6),
+      0 0 40px hsl(var(--quest-gold) / 0.2);
+  }
+}
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+@keyframes connector-draw {
+  from {
+    stroke-dashoffset: 100;
+    opacity: 0;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out forwards;
+}
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out forwards;
+}
+.animate-glow {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--quest-gold)) 0%,
+    hsl(43 90% 75%) 50%,
+    hsl(var(--quest-gold)) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+}
+
+.parchment-bg {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--card)) 0%,
+    hsl(20 15% 11%) 100%
+  );
+  border: 1px solid hsl(var(--border));
+  position: relative;
+}
+.parchment-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='none'/%3E%3Ccircle cx='1' cy='1' r='0.5' fill='hsl(30,15%,30%)' opacity='0.15'/%3E%3C/svg%3E");
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.quest-card {
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+.quest-card:hover {
+  transform: translateY(-2px);
+  border-color: hsl(var(--quest-gold) / 0.5);
+}
+.quest-card.completed {
+  border-color: hsl(var(--quest-green) / 0.6);
+}
+.quest-card.locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.branch-connector {
+  stroke: hsl(var(--border));
+  stroke-width: 2;
+  fill: none;
+  stroke-dasharray: 6 3;
+}
+.branch-connector.active {
+  stroke: hsl(var(--quest-gold) / 0.4);
+}
+
+.tab-active {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--quest-brown)) 0%,
+    hsl(var(--quest-brown-light)) 100%
+  );
+  border-color: hsl(var(--quest-gold) / 0.6) !important;
+  color: hsl(var(--quest-gold));
+}
+
+.progress-bar-fill {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--quest-gold-dark)),
+    hsl(var(--quest-gold))
+  );
+  transition: width 0.6s ease;
+}
+
+.badge-rare {
+  color: hsl(210 80% 65%);
+  border-color: hsl(210 80% 65% / 0.3);
+}
+.badge-epic {
+  color: hsl(270 70% 70%);
+  border-color: hsl(270 70% 70% / 0.3);
+}
+.badge-common {
+  color: hsl(var(--muted-foreground));
+  border-color: hsl(var(--border));
+}
+
+.ornament {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: hsl(var(--quest-gold) / 0.5);
+  font-size: 10px;
+  letter-spacing: 4px;
+}
+.ornament::before,
+.ornament::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--quest-gold) / 0.4),
+    transparent
+  );
 }
