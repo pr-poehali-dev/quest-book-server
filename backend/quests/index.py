@@ -197,12 +197,13 @@ def handler(event: dict, context) -> dict:
         s3.put_object(Bucket="files", Key=key, Body=file_data, ContentType=file_type)
         cdn_url = f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/files/{key}"
 
-        # Сохраняем прогресс
+        # Сохраняем прогресс со статусом pending (ждёт одобрения)
         if nick and quest_id:
             cur.execute(f"""
-                INSERT INTO {SCHEMA}.player_progress (player_nick, quest_id)
-                VALUES (%s, %s) ON CONFLICT DO NOTHING
-            """, (nick, quest_id))
+                INSERT INTO {SCHEMA}.player_progress (player_nick, quest_id, proof_url, status)
+                VALUES (%s, %s, %s, 'pending')
+                ON CONFLICT (player_nick, quest_id) DO UPDATE SET proof_url = EXCLUDED.proof_url, status = 'pending'
+            """, (nick, quest_id, cdn_url))
 
         # Discord уведомление со ссылкой на файл
         webhook_url = os.environ.get("DISCORD_WEBHOOK_URL", "")
@@ -229,5 +230,37 @@ def handler(event: dict, context) -> dict:
                 pass
 
         return ok({"success": True, "url": cdn_url})
+
+    # ADMIN: GET /proofs — список заявок на проверку
+    if method == "GET" and path == "/proofs":
+        if not is_admin(event):
+            return err("unauthorized", 401)
+        status_filter = params.get("status", "pending")
+        cur.execute(f"""
+            SELECT pp.id, pp.player_nick, pp.quest_id, pp.proof_url, pp.status, pp.completed_at,
+                   q.title as quest_title, q.xp, q.rarity, q.icon
+            FROM {SCHEMA}.player_progress pp
+            JOIN {SCHEMA}.quests q ON q.id = pp.quest_id
+            WHERE pp.status = %s
+            ORDER BY pp.completed_at DESC
+        """, (status_filter,))
+        rows = cur.fetchall()
+        result = [{"id": r[0], "player_nick": r[1], "quest_id": r[2], "proof_url": r[3],
+                   "status": r[4], "completed_at": r[5].isoformat() if r[5] else None,
+                   "quest_title": r[6], "xp": r[7], "rarity": r[8], "icon": r[9]} for r in rows]
+        return ok(result)
+
+    # ADMIN: POST /proofs/approve — одобрить или отклонить заявку
+    if method == "POST" and path == "/proofs/approve":
+        if not is_admin(event):
+            return err("unauthorized", 401)
+        proof_id = body.get("id")
+        action = body.get("action", "approve")  # approve | reject
+        new_status = "approved" if action == "approve" else "rejected"
+        cur.execute(f"UPDATE {SCHEMA}.player_progress SET status = %s WHERE id = %s RETURNING player_nick, quest_id", (new_status, proof_id))
+        row = cur.fetchone()
+        if not row:
+            return err("not found", 404)
+        return ok({"success": True, "status": new_status, "player_nick": row[0], "quest_id": row[1]})
 
     return err("not found", 404)
