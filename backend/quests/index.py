@@ -168,4 +168,66 @@ def handler(event: dict, context) -> dict:
         cur.execute(f"UPDATE {SCHEMA}.quests SET archived=TRUE WHERE id=%s", (body.get("id"),))
         return ok({"success": True})
 
+    # POST /proof — загрузка доказательства выполнения квеста
+    if method == "POST" and path == "/proof":
+        nick = body.get("nick", "").strip()
+        quest_id = body.get("quest_id")
+        quest_title = body.get("quest_title", "")
+        file_base64 = body.get("file_base64", "")
+        file_name = body.get("file_name", "proof.png")
+        file_type = body.get("file_type", "image/png")
+
+        if not file_base64:
+            return err("file_base64 required")
+
+        import base64
+        import boto3
+        import uuid
+
+        file_data = base64.b64decode(file_base64)
+        ext = file_name.rsplit(".", 1)[-1] if "." in file_name else "bin"
+        key = f"quest-proofs/{quest_id}/{uuid.uuid4()}.{ext}"
+
+        s3 = boto3.client(
+            "s3",
+            endpoint_url="https://bucket.poehali.dev",
+            aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
+            aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
+        )
+        s3.put_object(Bucket="files", Key=key, Body=file_data, ContentType=file_type)
+        cdn_url = f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/files/{key}"
+
+        # Сохраняем прогресс
+        if nick and quest_id:
+            cur.execute(f"""
+                INSERT INTO {SCHEMA}.player_progress (player_nick, quest_id)
+                VALUES (%s, %s) ON CONFLICT DO NOTHING
+            """, (nick, quest_id))
+
+        # Discord уведомление со ссылкой на файл
+        webhook_url = os.environ.get("DISCORD_WEBHOOK_URL", "")
+        if webhook_url:
+            import urllib.request
+            is_video = file_type.startswith("video/")
+            embed = {
+                "title": "📋 Доказательство выполнения",
+                "color": 0xF0C040,
+                "fields": [
+                    {"name": "Игрок", "value": f"**{nick}**", "inline": True},
+                    {"name": "Квест", "value": quest_title, "inline": True},
+                    {"name": "Файл", "value": f"[Открыть {'видео' if is_video else 'скриншот'}]({cdn_url})", "inline": False},
+                ],
+                "footer": {"text": "Quest Book Server"},
+            }
+            if not is_video:
+                embed["image"] = {"url": cdn_url}
+            payload = json.dumps({"embeds": [embed]}).encode()
+            req = urllib.request.Request(webhook_url, data=payload, headers={"Content-Type": "application/json"})
+            try:
+                urllib.request.urlopen(req, timeout=5)
+            except Exception:
+                pass
+
+        return ok({"success": True, "url": cdn_url})
+
     return err("not found", 404)
