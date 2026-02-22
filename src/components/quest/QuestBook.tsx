@@ -90,11 +90,15 @@ const QuestModal = ({ quest, player, onClose, onComplete }: {
   };
 
   const handleSubmit = async () => {
-    if (!file) return;
+    if (!file || uploading) return;
     setUploading(true);
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64 = (reader.result as string).split(",")[1];
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve((reader.result as string).split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
       await apiFetch("/proof", {
         method: "POST",
         body: JSON.stringify({
@@ -106,10 +110,12 @@ const QuestModal = ({ quest, player, onClose, onComplete }: {
           file_type: file.type,
         }),
       });
-      setUploading(false);
       onComplete(quest);
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      // ошибка — просто снимаем спиннер, игрок может попробовать снова
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
