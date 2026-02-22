@@ -82,37 +82,89 @@ const QuestModal = ({ quest, player, onClose, onComplete }: {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null;
     setFile(f);
+    setError(null);
     if (f) setPreview(URL.createObjectURL(f));
   };
+
+  // Сжимает изображение до base64 не тяжелее ~700 КБ
+  const compressImage = (f: File): Promise<{ base64: string; type: string; name: string }> =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(f);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const MAX = 1000;
+        let { width, height } = img;
+        if (width > MAX || height > MAX) {
+          const ratio = Math.min(MAX / width, MAX / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+        resolve({ base64: dataUrl.split(",")[1], type: "image/jpeg", name: f.name.replace(/\.[^.]+$/, ".jpg") });
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
 
   const handleSubmit = async () => {
     if (!file || uploading) return;
     setUploading(true);
+    setError(null);
     try {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve((reader.result as string).split(",")[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-      await apiFetch("/proof", {
+      let base64: string, fileType: string, fileName: string;
+
+      if (file.type.startsWith("video/")) {
+        // Видео — отправляем как есть, но проверяем размер
+        if (file.size > 5 * 1024 * 1024) {
+          setError("Видео слишком большое. Максимум 5 МБ.");
+          return;
+        }
+        base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve((reader.result as string).split(",")[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        fileType = file.type;
+        fileName = file.name;
+      } else {
+        // Изображение — сжимаем
+        const compressed = await compressImage(file);
+        base64 = compressed.base64;
+        fileType = compressed.type;
+        fileName = compressed.name;
+      }
+
+      const res = await apiFetch("/proof", {
         method: "POST",
         body: JSON.stringify({
           nick: player,
           quest_id: quest.id,
           quest_title: quest.title,
           file_base64: base64,
-          file_name: file.name,
-          file_type: file.type,
+          file_name: fileName,
+          file_type: fileType,
         }),
       });
+
+      if (res?.error) {
+        setError("Ошибка сервера: " + res.error);
+        return;
+      }
+
       onComplete(quest);
     } catch {
-      // ошибка — просто снимаем спиннер, игрок может попробовать снова
+      setError("Не удалось отправить. Проверь соединение и попробуй снова.");
     } finally {
       setUploading(false);
     }
@@ -158,7 +210,7 @@ const QuestModal = ({ quest, player, onClose, onComplete }: {
                   <>
                     <Icon name="Upload" size={24} color="hsl(var(--muted-foreground))" />
                     <p className="font-oswald text-xs tracking-wider uppercase text-muted-foreground mt-2">Скриншот или видео</p>
-                    <p className="font-crimson text-xs text-muted-foreground mt-1">PNG, JPG, MP4 до 20 МБ</p>
+                    <p className="font-crimson text-xs text-muted-foreground mt-1">PNG, JPG (любой размер) · MP4 до 5 МБ</p>
                   </>
                 )}
               </div>
@@ -166,6 +218,9 @@ const QuestModal = ({ quest, player, onClose, onComplete }: {
             </label>
             {file && (
               <p className="font-crimson text-xs text-muted-foreground mt-1.5 truncate">📎 {file.name}</p>
+            )}
+            {error && (
+              <p className="font-crimson text-xs mt-2 text-center" style={{ color: "hsl(var(--destructive))" }}>{error}</p>
             )}
           </div>
         )}
