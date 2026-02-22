@@ -1,0 +1,2 @@
+ALTER TABLE t_p88778265_quest_book_server.branches ADD COLUMN archived BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE t_p88778265_quest_book_server.quests ADD COLUMN archived BOOLEAN NOT NULL DEFAULT FALSE;

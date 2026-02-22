@@ -1,0 +1,20 @@
+{
+  "tests": [
+    {
+      "name": "GET / — список веток с квестами",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": [{"id": 1}],
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "GET /progress?nick=Steve",
+      "method": "GET",
+      "path": "/progress?nick=Steve",
+      "expectedStatus": 200,
+      "expectedBody": {"nick": "Steve"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}
