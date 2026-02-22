@@ -437,4 +437,36 @@ def handler(event: dict, context) -> dict:
             return err("not found", 404)
         return ok({"success": True, "status": new_status, "player_nick": row[0], "quest_id": row[1]})
 
+    # ADMIN: POST /tgsetup — установить webhook для Telegram-бота
+    if method == "POST" and path == "/tgsetup":
+        if not is_admin(event):
+            return err("unauthorized", 401)
+        tg_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+        if not tg_token:
+            return err("TELEGRAM_BOT_TOKEN не задан в секретах", 400)
+
+        host = (event.get("headers") or {}).get("Host", "")
+        if host:
+            webhook_url = f"https://{host}/tgwebhook"
+        else:
+            return err("Не удалось определить URL сервера", 500)
+
+        import urllib.request
+        payload = json.dumps({"url": webhook_url}).encode()
+        req = urllib.request.Request(
+            f"https://api.telegram.org/bot{tg_token}/setWebhook",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                tg_resp = json.loads(resp.read())
+        except Exception as e:
+            return err(f"Ошибка запроса к Telegram: {e}", 500)
+
+        if tg_resp.get("ok"):
+            return ok({"webhook_set": True, "webhook_url": webhook_url})
+        else:
+            return ok({"webhook_set": False, "error": tg_resp.get("description", "Telegram ответил ошибкой")})
+
     return err("not found", 404)
