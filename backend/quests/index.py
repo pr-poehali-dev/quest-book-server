@@ -10,7 +10,8 @@ SCHEMA = os.environ.get("MAIN_DB_SCHEMA", "t_p88778265_quest_book_server")
 CORS = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, X-Admin-Key",
+    "Access-Control-Allow-Headers": "Content-Type, X-Admin-Key, X-User-Id, X-Auth-Token, X-Session-Id, Authorization",
+    "Access-Control-Max-Age": "86400",
 }
 
 def get_conn():
