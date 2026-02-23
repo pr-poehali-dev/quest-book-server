@@ -3,8 +3,16 @@
     {
       "name": "GET / — список веток с квестами",
       "method": "GET",
-      "path": "/",
+      "path": "/?route=/",
       "expectedStatus": 200
+    },
+    {
+      "name": "GET /branches без admin-key — 401",
+      "method": "POST",
+      "path": "/?route=/branches",
+      "expectedStatus": 401,
+      "expectedBody": {"error": "string"},
+      "bodyMatcher": "partial"
     }
   ]
 }

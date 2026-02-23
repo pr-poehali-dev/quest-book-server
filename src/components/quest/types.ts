@@ -27,7 +27,10 @@ export interface Branch {
 export async function apiFetch(path: string, opts?: RequestInit, adminKey?: string) {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (adminKey) headers["X-Admin-Key"] = adminKey;
-  const url = `${API}${path}`;
+  const [route, qs] = path.split("?");
+  const searchParams = new URLSearchParams(qs || "");
+  searchParams.set("route", route);
+  const url = `${API}?${searchParams.toString()}`;
   try {
     const res = await fetch(url, { ...opts, headers });
     const data = await res.json();
