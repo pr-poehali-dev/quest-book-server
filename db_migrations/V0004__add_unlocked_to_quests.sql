@@ -1,0 +1,2 @@
+ALTER TABLE t_p88778265_quest_book_server.quests
+ADD COLUMN unlocked BOOLEAN NOT NULL DEFAULT FALSE;

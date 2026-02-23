@@ -151,7 +151,7 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
 
   const startEditQuest = (q: Quest) => {
     setEditingQuest(q);
-    setForm({ title: q.title, description: q.description, reward: q.reward, xp: q.xp, rarity: q.rarity, icon: q.icon });
+    setForm({ title: q.title, description: q.description, reward: q.reward, xp: q.xp, rarity: q.rarity, icon: q.icon, unlocked: q.unlocked });
   };
 
   const startEditBranch = (b: Branch) => {

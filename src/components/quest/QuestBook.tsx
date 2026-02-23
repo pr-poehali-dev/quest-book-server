@@ -136,6 +136,7 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
 
   const getQuestStatus = (q: Quest, idx: number, allQuests: Quest[]): "completed" | "active" | "locked" => {
     if (completedIds.includes(q.id)) return "completed";
+    if (q.unlocked) return "active";
     if (idx === 0) return "active";
     const prev = allQuests[idx - 1];
     if (completedIds.includes(prev.id)) return "active";

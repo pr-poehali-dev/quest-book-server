@@ -53,6 +53,15 @@ export default function AdminQuestFormCard({ form, setForm, onSave, onCancel, is
           </select>
         </div>
         <div className="col-span-2">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" className="w-4 h-4 accent-amber-600 rounded"
+              checked={!!form.unlocked}
+              onChange={e => setForm(p => ({ ...p, unlocked: e.target.checked }))} />
+            <span className="font-oswald text-[10px] tracking-wider uppercase text-muted-foreground">Открыт для всех</span>
+            <span className="font-crimson text-[11px] text-muted-foreground italic ml-1">(не требует прохождения предыдущего)</span>
+          </label>
+        </div>
+        <div className="col-span-2">
           <label className="block font-oswald text-[10px] tracking-wider uppercase text-muted-foreground mb-1">Иконка</label>
           <div className="flex flex-wrap gap-1.5">
             {ICONS_LIST.map(ic => (

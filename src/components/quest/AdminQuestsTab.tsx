@@ -166,6 +166,11 @@ export default function AdminQuestsTab({
                         <div className="flex items-center gap-2 mb-0.5">
                           <span className="font-cinzel text-sm font-semibold truncate">{q.title}</span>
                           <RarityBadge rarity={q.rarity} />
+                          {q.unlocked && (
+                            <span className="text-[10px] font-oswald tracking-widest uppercase px-1.5 py-0.5 rounded" style={{ background: "hsl(var(--quest-green) / 0.15)", color: "hsl(var(--quest-green-bright))" }}>
+                              <Icon name="Unlock" size={10} color="hsl(var(--quest-green-bright))" /> Открыт
+                            </span>
+                          )}
                           <span className="font-oswald text-xs ml-auto" style={{ color: "hsl(var(--quest-gold))" }}>+{q.xp} XP</span>
                         </div>
                         <p className="text-xs font-crimson text-muted-foreground truncate">{q.description}</p>

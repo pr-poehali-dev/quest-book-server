@@ -11,6 +11,7 @@ export interface Quest {
   rarity: Rarity;
   icon: string;
   sort_order: number;
+  unlocked?: boolean;
   status?: "completed" | "active" | "locked";
 }
 

@@ -65,7 +65,8 @@ def handler(event: dict, context) -> dict:
                        json_build_object(
                            'id', q.id, 'title', q.title, 'description', q.description,
                            'reward', q.reward, 'xp', q.xp, 'rarity', q.rarity,
-                           'icon', q.icon, 'sort_order', q.sort_order
+                           'icon', q.icon, 'sort_order', q.sort_order,
+                           'unlocked', q.unlocked
                        ) ORDER BY q.sort_order
                    ) FILTER (WHERE q.id IS NOT NULL AND q.archived = FALSE) as quests
             FROM {SCHEMA}.branches b
@@ -126,11 +127,11 @@ def handler(event: dict, context) -> dict:
         cur.execute(f"SELECT COALESCE(MAX(sort_order),0)+1 FROM {SCHEMA}.quests WHERE branch_id=%s AND archived=FALSE", (branch_id,))
         next_order = cur.fetchone()[0]
         cur.execute(f"""
-            INSERT INTO {SCHEMA}.quests (branch_id, title, description, reward, xp, rarity, icon, sort_order)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id
+            INSERT INTO {SCHEMA}.quests (branch_id, title, description, reward, xp, rarity, icon, sort_order, unlocked)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id
         """, (branch_id, body.get("title","Новый квест"), body.get("description",""),
               body.get("reward",""), int(body.get("xp",100)), body.get("rarity","common"),
-              body.get("icon","Star"), next_order))
+              body.get("icon","Star"), next_order, bool(body.get("unlocked", False))))
         return ok({"id": cur.fetchone()[0]})
 
     # ADMIN: PUT /quests
@@ -138,9 +139,9 @@ def handler(event: dict, context) -> dict:
         if not is_admin(event):
             return err("unauthorized", 401)
         cur.execute(f"""
-            UPDATE {SCHEMA}.quests SET title=%s, description=%s, reward=%s, xp=%s, rarity=%s, icon=%s WHERE id=%s
+            UPDATE {SCHEMA}.quests SET title=%s, description=%s, reward=%s, xp=%s, rarity=%s, icon=%s, unlocked=%s WHERE id=%s
         """, (body.get("title"), body.get("description"), body.get("reward"),
-              int(body.get("xp",100)), body.get("rarity"), body.get("icon"), body.get("id")))
+              int(body.get("xp",100)), body.get("rarity"), body.get("icon"), bool(body.get("unlocked", False)), body.get("id")))
         return ok({"success": True})
 
     # ADMIN: POST /quests/reorder
