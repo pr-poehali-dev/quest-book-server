@@ -19,20 +19,6 @@ const StatusDot = ({ status }: { status: "completed" | "active" | "locked" }) =>
   return <div className="w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0" style={{ borderColor: "hsl(var(--border))" }}><Icon name="Lock" size={10} color="hsl(var(--muted-foreground))" /></div>;
 };
 
-const XPBar = ({ total, earned }: { total: number; earned: number }) => {
-  const pct = total > 0 ? Math.round((earned / total) * 100) : 0;
-  return (
-    <div className="w-full">
-      <div className="flex justify-between mb-1.5">
-        <span className="text-[11px] font-oswald tracking-wider text-muted-foreground uppercase">Прогресс</span>
-        <span className="text-[11px] font-oswald" style={{ color: "hsl(var(--quest-gold))" }}>{earned} / {total} XP</span>
-      </div>
-      <div className="h-2 rounded-full" style={{ background: "hsl(var(--muted))" }}>
-        <div className="h-2 rounded-full progress-bar-fill" style={{ width: `${pct}%` }} />
-      </div>
-    </div>
-  );
-};
 
 const QuestCard = ({ quest, onClick }: { quest: Quest; onClick: (q: Quest) => void }) => {
   const status = quest.status ?? "locked";
@@ -57,9 +43,8 @@ const QuestCard = ({ quest, onClick }: { quest: Quest; onClick: (q: Quest) => vo
             <StatusDot status={status} />
           </div>
           <p className="text-xs font-crimson text-muted-foreground leading-tight mb-2">{quest.description}</p>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center">
             <RarityBadge rarity={quest.rarity} />
-            <span className="text-[11px] font-oswald tracking-wider" style={{ color: "hsl(var(--quest-gold))" }}>+{quest.xp} XP</span>
           </div>
         </div>
       </div>
@@ -92,7 +77,6 @@ const QuestModal = ({ quest, onClose }: {
             <span className="font-oswald text-xs tracking-widest uppercase text-muted-foreground">Награда</span>
           </div>
           <p className="font-crimson text-sm">{quest.reward}</p>
-          <p className="font-oswald text-xs mt-1" style={{ color: "hsl(var(--quest-gold))" }}>+{quest.xp} XP</p>
         </div>
 
         {quest.status === "completed" && (
@@ -144,10 +128,6 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
   };
 
   const activeBranch = branches.find(b => b.id === activeBranchId);
-  const allQuests = branches.flatMap(b => b.quests ?? []);
-  const totalXP = allQuests.filter(q => completedIds.includes(q.id)).reduce((s, q) => s + q.xp, 0);
-  const maxXP = allQuests.reduce((s, q) => s + q.xp, 0);
-  const completedCount = allQuests.filter(q => completedIds.includes(q.id)).length;
 
   const branchQuestsWithStatus: Quest[] = (activeBranch?.quests ?? []).map((q, idx, arr) => ({
     ...q,
@@ -166,15 +146,11 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
           <div className="flex items-center gap-3">
             <span className="text-2xl">📖</span>
             <div>
-              <h1 className="font-cinzel text-lg font-bold leading-none" style={{ color: "hsl(var(--quest-gold))" }}>Quest Book</h1>
-              <p className="font-crimson text-xs italic text-muted-foreground">Книга приключений</p>
+              <h1 className="font-cinzel text-lg font-bold leading-none" style={{ color: "hsl(var(--quest-gold))" }}>Quest Book RPM</h1>
+              <p className="font-crimson text-xs italic text-muted-foreground">Книга Мэрии RPM</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 px-1">
-              <Icon name="Trophy" size={14} color="hsl(var(--quest-gold))" />
-              <span className="font-oswald text-xs tracking-wider" style={{ color: "hsl(var(--quest-gold))" }}>{totalXP} XP</span>
-            </div>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full flex items-center justify-center font-cinzel text-sm font-bold"
                 style={{ background: "hsl(var(--quest-gold))", color: "hsl(var(--primary-foreground))" }}>
@@ -188,15 +164,6 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
           </div>
         </div>
       </header>
-
-      <div className="border-b" style={{ borderColor: "hsl(var(--border))" }}>
-        <div className="container mx-auto px-4 py-3 flex items-center gap-4">
-          <div className="flex-1"><XPBar total={maxXP} earned={totalXP} /></div>
-          <div className="flex-shrink-0">
-            <p className="font-oswald text-xs tracking-wider text-muted-foreground">{completedCount}/{allQuests.length}</p>
-          </div>
-        </div>
-      </div>
 
       <div className="border-b" style={{ borderColor: "hsl(var(--border))" }}>
         <div className="container mx-auto px-4">

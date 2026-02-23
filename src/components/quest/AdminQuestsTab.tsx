@@ -171,7 +171,7 @@ export default function AdminQuestsTab({
                               <Icon name="Unlock" size={10} color="hsl(var(--quest-green-bright))" /> Открыт
                             </span>
                           )}
-                          <span className="font-oswald text-xs ml-auto" style={{ color: "hsl(var(--quest-gold))" }}>+{q.xp} XP</span>
+
                         </div>
                         <p className="text-xs font-crimson text-muted-foreground truncate">{q.description}</p>
                         <p className="text-xs font-crimson text-muted-foreground truncate">🎁 {q.reward}</p>

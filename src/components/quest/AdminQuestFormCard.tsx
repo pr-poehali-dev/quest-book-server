@@ -41,10 +41,6 @@ export default function AdminQuestFormCard({ form, setForm, onSave, onCancel, is
           <input className={inp} style={st} value={form.description ?? ""} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
         </div>
         <div>
-          <label className="block font-oswald text-[10px] tracking-wider uppercase text-muted-foreground mb-1">XP</label>
-          <input type="number" className={inp} style={st} value={form.xp ?? 100} onChange={e => setForm(p => ({ ...p, xp: parseInt(e.target.value) || 0 }))} />
-        </div>
-        <div>
           <label className="block font-oswald text-[10px] tracking-wider uppercase text-muted-foreground mb-1">Редкость</label>
           <select className={inp} style={st} value={form.rarity ?? "common"} onChange={e => setForm(p => ({ ...p, rarity: e.target.value as Rarity }))}>
             <option value="common">Обычный</option>

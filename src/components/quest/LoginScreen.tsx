@@ -16,12 +16,12 @@ export default function LoginScreen({ onLogin, onAdmin }: LoginScreenProps) {
         <div className="text-center mb-8">
           <img
             src="https://cdn.poehali.dev/projects/d5e86919-d370-406c-a721-817de003fa32/files/2aaf2152-2c19-4345-9b41-e69234d4b1e1.jpg"
-            alt="Quest Book"
+            alt="Quest Book RPM"
             className="w-28 h-28 object-cover rounded-lg border-2 mx-auto mb-4"
             style={{ borderColor: "hsl(var(--quest-gold) / 0.5)", boxShadow: "0 0 30px hsl(var(--quest-gold) / 0.2)" }}
           />
-          <h1 className="font-cinzel text-4xl font-black mb-2 gold-shimmer">Quest Book</h1>
-          <p className="font-crimson text-lg italic text-muted-foreground">Книга приключений</p>
+          <h1 className="font-cinzel text-4xl font-black mb-2 gold-shimmer">Quest Book RPM</h1>
+          <p className="font-crimson text-lg italic text-muted-foreground">Книга Мэрии RPM</p>
         </div>
 
         <div className="parchment-bg rounded-lg border p-6" style={{ borderColor: "hsl(var(--quest-gold) / 0.35)" }}>

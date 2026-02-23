@@ -310,7 +310,7 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
                   </div>
                   <div className="flex-1 min-w-0">
                     <span className="font-crimson text-sm truncate block">{p.nick}</span>
-                    <span className="font-oswald text-[10px] text-muted-foreground">{p.completed} done · {p.total_xp} XP</span>
+                    <span className="font-oswald text-[10px] text-muted-foreground">{p.completed} выполнено</span>
                   </div>
                 </button>
               ))
@@ -399,7 +399,7 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
                                 <span className={`font-cinzel text-sm font-semibold truncate block ${isCompleted ? "text-muted-foreground line-through" : ""}`}>
                                   {quest.title}
                                 </span>
-                                <span className="font-oswald text-[10px] text-muted-foreground">+{quest.xp} XP · {quest.rarity}</span>
+                                <span className="font-oswald text-[10px] text-muted-foreground">{quest.rarity}</span>
                               </div>
                               <span className="font-oswald text-[10px] tracking-wider flex-shrink-0"
                                 style={{ color: isCompleted ? "hsl(var(--quest-green-bright))" : "hsl(var(--muted-foreground))" }}>
