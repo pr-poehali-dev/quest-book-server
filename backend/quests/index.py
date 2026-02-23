@@ -25,8 +25,15 @@ def ok(data, status=200):
 def err(msg, status=400):
     return {"statusCode": status, "headers": {**CORS, "Content-Type": "application/json"}, "body": json.dumps({"error": msg})}
 
+def get_header(event, name):
+    headers = event.get("headers") or {}
+    for k, v in headers.items():
+        if k.lower() == name.lower():
+            return v
+    return ""
+
 def is_admin(event):
-    key = (event.get("headers") or {}).get("X-Admin-Key", "")
+    key = get_header(event, "X-Admin-Key")
     return key == os.environ.get("ADMIN_KEY", "")
 
 def handler(event: dict, context) -> dict:

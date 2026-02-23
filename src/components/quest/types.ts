@@ -30,7 +30,9 @@ export async function apiFetch(path: string, opts?: RequestInit, adminKey?: stri
   const url = `${API}${path}`;
   try {
     const res = await fetch(url, { ...opts, headers });
-    return res.json();
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    return data;
   } catch (e) {
     console.error(`Fetch error: ${e} for ${url}`);
     throw e;

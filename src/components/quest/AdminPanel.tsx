@@ -84,10 +84,17 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
     p.nick.toLowerCase().includes(playerSearch.toLowerCase())
   );
 
+  const [error, setError] = useState<string | null>(null);
+
   const withLoad = async (fn: () => Promise<void>) => {
     setLoading(true);
-    await fn();
-    await onRefresh();
+    setError(null);
+    try {
+      await fn();
+      await onRefresh();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Ошибка запроса");
+    }
     setLoading(false);
   };
 
@@ -165,6 +172,18 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
           </button>
         </div>
 
+        {error && (
+          <div className="mx-3 mt-3 p-2 rounded text-xs font-crimson border" style={{ background: "hsl(var(--destructive) / 0.1)", borderColor: "hsl(var(--destructive) / 0.3)", color: "hsl(var(--destructive))" }}>
+            {error}
+            <button className="ml-2 underline" onClick={() => setError(null)}>×</button>
+          </div>
+        )}
+        {loading && (
+          <div className="mx-3 mt-2 text-center">
+            <span className="font-crimson text-xs text-muted-foreground animate-pulse italic">Сохранение...</span>
+          </div>
+        )}
+
         <div className="flex border-b" style={{ borderColor: "hsl(var(--border))" }}>
           <button
             className="flex-1 py-2.5 font-oswald text-xs tracking-wider uppercase transition-colors"
@@ -197,12 +216,12 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
                 <Icon name={b.icon} size={15} color={b.color} fallback="Star" />
                 <span className="font-crimson text-sm truncate flex-1">{b.title}</span>
                 <span className="font-oswald text-[10px] text-muted-foreground">{(b.quests ?? []).length}</span>
-                <div className="flex gap-0.5 opacity-0 group-hover:opacity-100">
-                  <button className="p-0.5 rounded hover:bg-background" onClick={e => { e.stopPropagation(); startEditBranch(b); }}>
-                    <Icon name="Pencil" size={11} color="hsl(var(--muted-foreground))" />
+                <div className="flex gap-0.5">
+                  <button className="p-1 rounded hover:bg-background" onClick={e => { e.stopPropagation(); startEditBranch(b); }}>
+                    <Icon name="Pencil" size={13} color="hsl(var(--muted-foreground))" />
                   </button>
-                  <button className="p-0.5 rounded hover:bg-background" onClick={e => { e.stopPropagation(); removeBranch(b); }}>
-                    <Icon name="Trash2" size={11} color="hsl(var(--destructive))" />
+                  <button className="p-1 rounded hover:bg-background" onClick={e => { e.stopPropagation(); removeBranch(b); }}>
+                    <Icon name="Trash2" size={13} color="hsl(var(--destructive))" />
                   </button>
                 </div>
               </button>
