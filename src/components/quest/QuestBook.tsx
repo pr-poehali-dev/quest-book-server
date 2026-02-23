@@ -171,7 +171,7 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 parchment-bg border rounded px-3 py-1.5">
+            <div className="hidden sm:flex items-center gap-2 px-1">
               <Icon name="Trophy" size={14} color="hsl(var(--quest-gold))" />
               <span className="font-oswald text-xs tracking-wider" style={{ color: "hsl(var(--quest-gold))" }}>{totalXP} XP</span>
             </div>

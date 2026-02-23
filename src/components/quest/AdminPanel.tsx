@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Icon from "@/components/ui/icon";
 import { Branch, Quest, apiFetch } from "./types";
 import AdminQuestsTab from "./AdminQuestsTab";
@@ -149,6 +149,40 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
     await apiFetch("/quests/reorder", { method: "POST", body: JSON.stringify({ ids }) }, adminKey);
   });
 
+  const reorderBranches = (ids: number[]) => withLoad(async () => {
+    await apiFetch("/branches/reorder", { method: "POST", body: JSON.stringify({ ids }) }, adminKey);
+  });
+
+  const [brDragIdx, setBrDragIdx] = useState<number | null>(null);
+  const [brOverIdx, setBrOverIdx] = useState<number | null>(null);
+  const brDragNode = useRef<HTMLButtonElement | null>(null);
+
+  const brDragStart = (idx: number, e: React.DragEvent<HTMLButtonElement>) => {
+    setBrDragIdx(idx);
+    brDragNode.current = e.currentTarget;
+    e.dataTransfer.effectAllowed = "move";
+    e.currentTarget.style.opacity = "0.4";
+  };
+
+  const brDragEnd = () => {
+    if (brDragNode.current) brDragNode.current.style.opacity = "1";
+    if (brDragIdx !== null && brOverIdx !== null && brDragIdx !== brOverIdx) {
+      const reordered = [...branches];
+      const [moved] = reordered.splice(brDragIdx, 1);
+      reordered.splice(brOverIdx, 0, moved);
+      reorderBranches(reordered.map(b => b.id));
+    }
+    setBrDragIdx(null);
+    setBrOverIdx(null);
+    brDragNode.current = null;
+  };
+
+  const brDragOver = (idx: number, e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (brOverIdx !== idx) setBrOverIdx(idx);
+  };
+
   const startEditQuest = (q: Quest) => {
     setEditingQuest(q);
     setForm({ title: q.title, description: q.description, reward: q.reward, xp: q.xp, rarity: q.rarity, icon: q.icon, unlocked: q.unlocked });
@@ -213,10 +247,22 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
                 <Icon name="Plus" size={14} color="hsl(var(--quest-gold))" />
               </button>
             </div>
-            {branches.map(b => (
+            {branches.map((b, idx) => (
               <button key={b.id}
-                className={`w-full text-left px-3 py-2.5 rounded mb-1 flex items-center gap-2 transition-colors group ${activeBranch?.id === b.id ? "bg-secondary" : "hover:bg-secondary/50"}`}
+                draggable
+                onDragStart={e => brDragStart(idx, e)}
+                onDragEnd={brDragEnd}
+                onDragOver={e => brDragOver(idx, e)}
+                className={`w-full text-left px-3 py-2.5 rounded mb-1 flex items-center gap-2 transition-colors group cursor-grab active:cursor-grabbing ${activeBranch?.id === b.id ? "bg-secondary" : "hover:bg-secondary/50"}`}
+                style={{
+                  borderWidth: 1,
+                  borderStyle: "solid",
+                  borderColor: brDragIdx !== null && brOverIdx === idx && brDragIdx !== idx
+                    ? "hsl(var(--quest-gold))"
+                    : "transparent",
+                }}
                 onClick={() => { setActiveBranch(b); setEditingBranch(null); setEditingQuest(null); }}>
+                <Icon name="GripVertical" size={13} color="hsl(var(--muted-foreground))" />
                 <Icon name={b.icon} size={15} color={b.color} fallback="Star" />
                 <span className="font-crimson text-sm truncate flex-1">{b.title}</span>
                 <span className="font-oswald text-[10px] text-muted-foreground">{(b.quests ?? []).length}</span>
