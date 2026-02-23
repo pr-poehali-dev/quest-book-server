@@ -145,6 +145,10 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
     });
   };
 
+  const reorderQuests = (ids: number[]) => withLoad(async () => {
+    await apiFetch("/quests/reorder", { method: "POST", body: JSON.stringify({ ids }) }, adminKey);
+  });
+
   const startEditQuest = (q: Quest) => {
     setEditingQuest(q);
     setForm({ title: q.title, description: q.description, reward: q.reward, xp: q.xp, rarity: q.rarity, icon: q.icon });
@@ -286,6 +290,7 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
           onCancelQuest={() => setEditingQuest(null)}
           onStartEditQuest={startEditQuest}
           onRemoveQuest={removeQuest}
+          onReorderQuests={reorderQuests}
         />
       )}
 

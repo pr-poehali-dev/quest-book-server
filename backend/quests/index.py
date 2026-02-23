@@ -143,6 +143,28 @@ def handler(event: dict, context) -> dict:
               int(body.get("xp",100)), body.get("rarity"), body.get("icon"), body.get("id")))
         return ok({"success": True})
 
+    # ADMIN: POST /quests/reorder
+    if method == "POST" and path == "/quests/reorder":
+        if not is_admin(event):
+            return err("unauthorized", 401)
+        ids = body.get("ids", [])
+        if not ids:
+            return err("ids required")
+        for i, qid in enumerate(ids):
+            cur.execute(f"UPDATE {SCHEMA}.quests SET sort_order=%s WHERE id=%s", (i, qid))
+        return ok({"success": True})
+
+    # ADMIN: POST /branches/reorder
+    if method == "POST" and path == "/branches/reorder":
+        if not is_admin(event):
+            return err("unauthorized", 401)
+        ids = body.get("ids", [])
+        if not ids:
+            return err("ids required")
+        for i, bid in enumerate(ids):
+            cur.execute(f"UPDATE {SCHEMA}.branches SET sort_order=%s WHERE id=%s", (i, bid))
+        return ok({"success": True})
+
     # ADMIN: POST /quests/remove
     if method == "POST" and path == "/quests/remove":
         if not is_admin(event):

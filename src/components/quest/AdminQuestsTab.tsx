@@ -1,3 +1,4 @@
+import { useState, useRef } from "react";
 import Icon from "@/components/ui/icon";
 import { Branch, Quest } from "./types";
 import AdminQuestFormCard, { RarityBadge } from "./AdminQuestFormCard";
@@ -21,6 +22,7 @@ interface AdminQuestsTabProps {
   onCancelQuest: () => void;
   onStartEditQuest: (q: Quest) => void;
   onRemoveQuest: (q: Quest) => void;
+  onReorderQuests: (ids: number[]) => void;
 }
 
 export default function AdminQuestsTab({
@@ -29,8 +31,40 @@ export default function AdminQuestsTab({
   setBranchForm, setForm,
   onSaveBranch, onCancelBranch,
   onAddQuest, onSaveNewQuest, onSaveQuest, onCancelQuest,
-  onStartEditQuest, onRemoveQuest,
+  onStartEditQuest, onRemoveQuest, onReorderQuests,
 }: AdminQuestsTabProps) {
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [overIdx, setOverIdx] = useState<number | null>(null);
+  const dragNode = useRef<HTMLDivElement | null>(null);
+
+  const quests = currentBranch?.quests ?? [];
+
+  const handleDragStart = (idx: number, e: React.DragEvent<HTMLDivElement>) => {
+    setDragIdx(idx);
+    dragNode.current = e.currentTarget;
+    e.dataTransfer.effectAllowed = "move";
+    e.currentTarget.style.opacity = "0.4";
+  };
+
+  const handleDragEnd = () => {
+    if (dragNode.current) dragNode.current.style.opacity = "1";
+    if (dragIdx !== null && overIdx !== null && dragIdx !== overIdx) {
+      const reordered = [...quests];
+      const [moved] = reordered.splice(dragIdx, 1);
+      reordered.splice(overIdx, 0, moved);
+      onReorderQuests(reordered.map(q => q.id));
+    }
+    setDragIdx(null);
+    setOverIdx(null);
+    dragNode.current = null;
+  };
+
+  const handleDragOver = (idx: number, e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (overIdx !== idx) setOverIdx(idx);
+  };
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {editingBranch && (
@@ -102,13 +136,29 @@ export default function AdminQuestsTab({
               {editingQuest?.id === 0 && (
                 <AdminQuestFormCard form={form} setForm={setForm} onSave={onSaveNewQuest} onCancel={onCancelQuest} isNew />
               )}
-              {(currentBranch.quests ?? []).map(q => (
+              {quests.map((q, idx) => (
                 <div key={q.id}>
                   {editingQuest?.id === q.id ? (
                     <AdminQuestFormCard form={form} setForm={setForm} onSave={() => onSaveQuest(q)} onCancel={onCancelQuest} />
                   ) : (
-                    <div className="parchment-bg rounded border p-3 flex items-start gap-3 group"
-                      style={{ borderColor: "hsl(var(--border))" }}>
+                    <div
+                      draggable
+                      onDragStart={e => handleDragStart(idx, e)}
+                      onDragEnd={handleDragEnd}
+                      onDragOver={e => handleDragOver(idx, e)}
+                      className={`parchment-bg rounded border p-3 flex items-start gap-3 group cursor-grab active:cursor-grabbing transition-all ${
+                        dragIdx !== null && overIdx === idx && dragIdx !== idx
+                          ? "border-dashed scale-[1.02]"
+                          : ""
+                      }`}
+                      style={{
+                        borderColor: dragIdx !== null && overIdx === idx && dragIdx !== idx
+                          ? "hsl(var(--quest-gold))"
+                          : "hsl(var(--border))",
+                      }}>
+                      <div className="flex-shrink-0 flex flex-col items-center justify-center text-muted-foreground mr-0.5 select-none">
+                        <Icon name="GripVertical" size={16} color="hsl(var(--muted-foreground))" />
+                      </div>
                       <div className="w-9 h-9 rounded flex items-center justify-center flex-shrink-0" style={{ background: "hsl(var(--muted))" }}>
                         <Icon name={q.icon} size={18} fallback="Star" color="hsl(var(--quest-gold))" />
                       </div>
@@ -133,7 +183,7 @@ export default function AdminQuestsTab({
                   )}
                 </div>
               ))}
-              {(currentBranch.quests ?? []).length === 0 && editingQuest?.id !== 0 && (
+              {quests.length === 0 && editingQuest?.id !== 0 && (
                 <div className="text-center py-12 text-muted-foreground">
                   <Icon name="ScrollText" size={40} color="hsl(var(--muted-foreground))" />
                   <p className="font-crimson text-sm mt-3 italic">В этой ветке нет квестов</p>
