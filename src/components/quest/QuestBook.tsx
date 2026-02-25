@@ -4,8 +4,10 @@ import { Branch, Quest, Rarity } from "./types";
 
 const RarityBadge = ({ rarity }: { rarity: Rarity }) => {
   const labels = { common: "Обычный", rare: "Редкий", epic: "Эпик" };
+  const icons = { common: "Circle", rare: "Gem", epic: "Crown" };
   return (
-    <span className={`text-[10px] font-oswald tracking-widest uppercase px-2 py-0.5 rounded border badge-${rarity}`}>
+    <span className={`inline-flex items-center gap-1 text-[10px] font-oswald tracking-widest uppercase px-2 py-0.5 rounded border badge-${rarity}`}>
+      <Icon name={icons[rarity]} size={9} />
       {labels[rarity]}
     </span>
   );
@@ -13,22 +15,49 @@ const RarityBadge = ({ rarity }: { rarity: Rarity }) => {
 
 const StatusDot = ({ status }: { status: "completed" | "active" | "locked" }) => {
   if (status === "completed")
-    return <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "hsl(var(--quest-green))" }}><Icon name="Check" size={11} color="white" /></div>;
+    return (
+      <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300"
+        style={{ background: "hsl(var(--quest-green))", boxShadow: "0 0 8px hsl(var(--quest-green) / 0.4)" }}>
+        <Icon name="Check" size={11} color="white" />
+      </div>
+    );
   if (status === "active")
-    return <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 animate-pulse" style={{ borderColor: "hsl(var(--quest-gold))" }}><div className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--quest-gold))" }} /></div>;
-  return <div className="w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0" style={{ borderColor: "hsl(var(--border))" }}><Icon name="Lock" size={10} color="hsl(var(--muted-foreground))" /></div>;
+    return (
+      <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 animate-glow"
+        style={{ borderColor: "hsl(var(--quest-gold))" }}>
+        <div className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--quest-gold))" }} />
+      </div>
+    );
+  return (
+    <div className="w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0"
+      style={{ borderColor: "hsl(var(--border))" }}>
+      <Icon name="Lock" size={10} color="hsl(var(--muted-foreground))" />
+    </div>
+  );
 };
 
+const VerticalConnector = ({ status }: { status: "completed" | "active" | "locked" }) => (
+  <div className="flex justify-center py-0.5">
+    <div className="w-px h-5" style={{
+      background: status === "completed"
+        ? "linear-gradient(to bottom, hsl(var(--quest-green) / 0.5), hsl(var(--quest-green) / 0.15))"
+        : status === "active"
+          ? "linear-gradient(to bottom, hsl(var(--quest-gold) / 0.4), hsl(var(--quest-gold) / 0.1))"
+          : "hsl(var(--border) / 0.5)"
+    }} />
+  </div>
+);
 
-const QuestCard = ({ quest, onClick }: { quest: Quest; onClick: (q: Quest) => void }) => {
+const QuestCard = ({ quest, onClick, index }: { quest: Quest; onClick: (q: Quest) => void; index: number }) => {
   const status = quest.status ?? "locked";
   return (
     <div
-      className={`quest-card parchment-bg rounded border p-3 animate-fade-in ${status === "locked" ? "locked" : ""} ${status === "completed" ? "completed" : ""}`}
+      className={`quest-card parchment-bg rounded border p-3 animate-stagger-in ${status === "locked" ? "locked" : ""} ${status === "completed" ? "completed" : ""}`}
+      style={{ animationDelay: `${index * 60}ms` }}
       onClick={() => status !== "locked" && onClick(quest)}
     >
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 w-10 h-10 rounded flex items-center justify-center"
+        <div className="flex-shrink-0 w-10 h-10 rounded flex items-center justify-center transition-colors duration-300"
           style={{ background: status === "completed" ? "hsl(var(--quest-green) / 0.2)" : status === "active" ? "hsl(var(--quest-gold) / 0.15)" : "hsl(var(--muted))" }}>
           <Icon name={quest.icon} size={20} fallback="Star"
             color={status === "completed" ? "hsl(var(--quest-green-bright))" : status === "active" ? "hsl(var(--quest-gold))" : "hsl(var(--muted-foreground))"}
@@ -43,8 +72,13 @@ const QuestCard = ({ quest, onClick }: { quest: Quest; onClick: (q: Quest) => vo
             <StatusDot status={status} />
           </div>
           <p className="text-xs font-crimson text-muted-foreground leading-tight mb-2">{quest.description}</p>
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             <RarityBadge rarity={quest.rarity} />
+            {quest.reward && status !== "locked" && (
+              <span className="text-[10px] font-crimson italic text-muted-foreground/60 truncate">
+                <Icon name="Gift" size={9} className="inline mr-0.5" />{quest.reward}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -52,25 +86,31 @@ const QuestCard = ({ quest, onClick }: { quest: Quest; onClick: (q: Quest) => vo
   );
 };
 
-const QuestModal = ({ quest, onClose }: {
-  quest: Quest;
-  onClose: () => void;
-}) => {
+const QuestModal = ({ quest, onClose }: { quest: Quest; onClose: () => void }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0" style={{ background: "hsl(var(--background) / 0.85)", backdropFilter: "blur(4px)" }} />
-      <div className="relative w-full max-w-md parchment-bg rounded-lg border animate-scale-in p-6"
-        style={{ borderColor: "hsl(var(--quest-gold) / 0.4)" }} onClick={e => e.stopPropagation()}>
+      <div className="absolute inset-0" style={{ background: "hsl(var(--background) / 0.85)", backdropFilter: "blur(6px)" }} />
+      <div className="relative w-full max-w-md parchment-bg rounded-lg border corner-decor animate-scale-in p-6"
+        style={{ borderColor: "hsl(var(--quest-gold) / 0.4)", boxShadow: "0 0 60px hsl(var(--quest-gold) / 0.1), 0 25px 50px hsl(0 0% 0% / 0.5)" }}
+        onClick={e => e.stopPropagation()}>
+
         <div className="text-center mb-4">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-3 border-2"
-            style={{ background: "hsl(var(--quest-brown))", borderColor: "hsl(var(--quest-gold) / 0.5)" }}>
-            <Icon name={quest.icon} size={26} color="hsl(var(--quest-gold))" fallback="Star" />
+          <div className="relative inline-block">
+            <div className="absolute -inset-2 rounded-full animate-breathe"
+              style={{ background: "radial-gradient(circle, hsl(var(--quest-gold) / 0.15) 0%, transparent 70%)" }} />
+            <div className="relative inline-flex items-center justify-center w-14 h-14 rounded-full mb-3 border-2"
+              style={{ background: "hsl(var(--quest-brown))", borderColor: "hsl(var(--quest-gold) / 0.5)" }}>
+              <Icon name={quest.icon} size={26} color="hsl(var(--quest-gold))" fallback="Star" />
+            </div>
           </div>
-          <h3 className="font-cinzel text-xl font-bold mb-2" style={{ color: "hsl(var(--quest-gold))" }}>{quest.title}</h3>
+          <h3 className="font-cinzel text-xl font-bold mb-2 text-glow" style={{ color: "hsl(var(--quest-gold))" }}>{quest.title}</h3>
           <RarityBadge rarity={quest.rarity} />
         </div>
+
         <div className="ornament mb-4"><span>ЗАДАНИЕ</span></div>
+
         <p className="font-crimson text-base text-center mb-5 leading-relaxed">{quest.description}</p>
+
         <div className="parchment-bg rounded p-3 mb-4 border" style={{ borderColor: "hsl(var(--quest-gold) / 0.2)" }}>
           <div className="flex items-center gap-2 mb-1">
             <Icon name="Gift" size={14} color="hsl(var(--quest-gold))" />
@@ -81,9 +121,9 @@ const QuestModal = ({ quest, onClose }: {
 
         {quest.status === "completed" && (
           <div className="rounded p-3 mb-4 text-center border" style={{ borderColor: "hsl(var(--quest-green) / 0.4)", background: "hsl(var(--quest-green) / 0.1)" }}>
-            <p className="font-cinzel text-sm font-semibold" style={{ color: "hsl(var(--quest-green-bright))" }}>
+            <p className="font-cinzel text-sm font-semibold flex items-center justify-center gap-2" style={{ color: "hsl(var(--quest-green-bright))" }}>
               <Icon name="CheckCircle" size={16} color="hsl(var(--quest-green-bright))" />
-              <span className="ml-2">Квест выполнен</span>
+              Квест выполнен
             </p>
           </div>
         )}
@@ -96,13 +136,27 @@ const QuestModal = ({ quest, onClose }: {
           </div>
         )}
 
+        <div className="diamond-divider mb-4"><div className="diamond" /></div>
+
         <div className="flex">
-          <button className="flex-1 py-2.5 rounded border font-oswald text-sm tracking-wider uppercase transition-colors hover:bg-secondary"
+          <button className="flex-1 py-2.5 rounded border font-oswald text-sm tracking-wider uppercase transition-all duration-200 hover:bg-secondary"
             style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }} onClick={onClose}>
             Закрыть
           </button>
         </div>
       </div>
+    </div>
+  );
+};
+
+const BranchProgress = ({ completed, total }: { completed: number; total: number }) => {
+  const pct = total > 0 ? (completed / total) * 100 : 0;
+  return (
+    <div className="flex items-center gap-2">
+      <div className="h-1.5 flex-1 rounded-full overflow-hidden" style={{ background: "hsl(var(--muted))" }}>
+        <div className="h-full rounded-full progress-bar-fill" style={{ width: `${pct}%` }} />
+      </div>
+      <span className="font-oswald text-[10px] tracking-wider text-muted-foreground whitespace-nowrap">{completed}/{total}</span>
     </div>
   );
 };
@@ -138,27 +192,37 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
     ? branchQuestsWithStatus.find(q => q.id === selectedQuest.id) ?? selectedQuest
     : null;
 
+  const totalCompleted = completedIds.length;
+  const totalQuests = branches.reduce((s, b) => s + (b.quests?.length ?? 0), 0);
+
   return (
     <div className="min-h-screen">
       <header className="border-b sticky top-0 z-40"
-        style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--background) / 0.95)", backdropFilter: "blur(8px)" }}>
+        style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--background) / 0.95)", backdropFilter: "blur(12px)" }}>
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">📖</span>
+            <div className="w-9 h-9 rounded flex items-center justify-center"
+              style={{ background: "hsl(var(--quest-brown))", border: "1px solid hsl(var(--quest-gold) / 0.3)" }}>
+              <Icon name="BookOpen" size={18} color="hsl(var(--quest-gold))" />
+            </div>
             <div>
-              <h1 className="font-cinzel text-lg font-bold leading-none" style={{ color: "hsl(var(--quest-gold))" }}>Quest Book RPM</h1>
+              <h1 className="font-cinzel text-lg font-bold leading-none text-glow" style={{ color: "hsl(var(--quest-gold))" }}>Quest Book RPM</h1>
               <p className="font-crimson text-xs italic text-muted-foreground">Книга Мэрии RPM</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded" style={{ background: "hsl(var(--muted))" }}>
+              <Icon name="Scroll" size={12} color="hsl(var(--quest-gold) / 0.7)" />
+              <span className="font-oswald text-[10px] tracking-wider text-muted-foreground">{totalCompleted}/{totalQuests}</span>
+            </div>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full flex items-center justify-center font-cinzel text-sm font-bold"
-                style={{ background: "hsl(var(--quest-gold))", color: "hsl(var(--primary-foreground))" }}>
+                style={{ background: "hsl(var(--quest-gold))", color: "hsl(var(--primary-foreground))", boxShadow: "0 0 12px hsl(var(--quest-gold) / 0.25)" }}>
                 {player[0].toUpperCase()}
               </div>
               <span className="hidden sm:block font-oswald text-sm tracking-wide">{player}</span>
             </div>
-            <button className="p-1.5 rounded hover:bg-secondary" onClick={onLogout} title="Выйти">
+            <button className="p-1.5 rounded hover:bg-secondary transition-colors duration-200" onClick={onLogout} title="Выйти">
               <Icon name="LogOut" size={15} color="hsl(var(--muted-foreground))" />
             </button>
           </div>
@@ -167,19 +231,29 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
 
       <div className="border-b" style={{ borderColor: "hsl(var(--border))" }}>
         <div className="container mx-auto px-4">
-          <div className="flex gap-1 py-2 overflow-x-auto">
+          <div className="flex gap-1 py-2 overflow-x-auto scroll-fade-right">
             {branches.map(b => {
               const bCompleted = (b.quests ?? []).filter(q => completedIds.includes(q.id)).length;
-              const isActive = activeBranchId === b.id;
+              const bTotal = (b.quests ?? []).length;
+              const isActive = b.id === activeBranchId;
               return (
-                <button key={b.id} onClick={() => setActiveBranchId(b.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded border transition-all whitespace-nowrap font-oswald text-sm tracking-wide ${isActive ? "tab-active" : "border-transparent hover:bg-secondary"}`}>
+                <button
+                  key={b.id}
+                  onClick={() => setActiveBranchId(b.id)}
+                  className={`relative flex items-center gap-2 px-3 py-2 rounded border text-left flex-shrink-0 transition-all duration-200 ${isActive ? "tab-active" : "hover:bg-secondary/50"}`}
+                  style={{ borderColor: isActive ? undefined : "hsl(var(--border))" }}
+                >
                   <Icon name={b.icon} size={15} fallback="Star" color={isActive ? "hsl(var(--quest-gold))" : "hsl(var(--muted-foreground))"} />
-                  <span>{b.title}</span>
-                  <span className="text-[11px] px-1.5 py-0.5 rounded ml-1"
-                    style={{ background: isActive ? "hsl(var(--quest-gold) / 0.2)" : "hsl(var(--muted))", color: isActive ? "hsl(var(--quest-gold))" : "hsl(var(--muted-foreground))" }}>
-                    {bCompleted}/{(b.quests ?? []).length}
-                  </span>
+                  <div>
+                    <span className="font-oswald text-xs tracking-wider block leading-tight">{b.title}</span>
+                    <span className="font-crimson text-[10px] text-muted-foreground">{bCompleted}/{bTotal}</span>
+                  </div>
+                  {bCompleted === bTotal && bTotal > 0 && (
+                    <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center ml-1"
+                      style={{ background: "hsl(var(--quest-green))" }}>
+                      <Icon name="Check" size={8} color="white" />
+                    </div>
+                  )}
                 </button>
               );
             })}
@@ -187,80 +261,50 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
         </div>
       </div>
 
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-6 max-w-2xl animate-page-turn">
         {activeBranch && (
           <>
-            <div className="mb-6 animate-fade-in">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-11 h-11 rounded-lg flex items-center justify-center" style={{ background: `${activeBranch.color}22` }}>
-                  <Icon name={activeBranch.icon} size={24} color={activeBranch.color} fallback="Star" />
+            <div className="mb-5">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded flex items-center justify-center"
+                  style={{ background: activeBranch.color + "22", border: `1px solid ${activeBranch.color}44` }}>
+                  <Icon name={activeBranch.icon} size={16} color={activeBranch.color} fallback="Star" />
                 </div>
-                <div>
-                  <h2 className="font-cinzel text-2xl font-bold">{activeBranch.title}</h2>
-                  <p className="font-crimson text-sm italic text-muted-foreground">{activeBranch.description}</p>
+                <div className="flex-1">
+                  <h2 className="font-cinzel text-lg font-bold" style={{ color: activeBranch.color }}>{activeBranch.title}</h2>
+                  {activeBranch.description && (
+                    <p className="font-crimson text-sm italic text-muted-foreground">{activeBranch.description}</p>
+                  )}
                 </div>
               </div>
-              <div className="ornament"><span>ЦЕПОЧКА ЗАДАНИЙ</span></div>
+              <BranchProgress
+                completed={(activeBranch.quests ?? []).filter(q => completedIds.includes(q.id)).length}
+                total={(activeBranch.quests ?? []).length}
+              />
             </div>
 
-            <div className="grid gap-0">
-              {branchQuestsWithStatus.map((quest, idx) => (
-                <div key={quest.id} className="flex items-stretch gap-3">
-                  <div className="flex flex-col items-center flex-shrink-0 pt-1">
-                    <div className="w-8 h-8 rounded-full border-2 flex items-center justify-center font-cinzel text-xs font-bold z-10"
-                      style={{
-                        borderColor: quest.status === "completed" ? "hsl(var(--quest-green))" : quest.status === "active" ? "hsl(var(--quest-gold))" : "hsl(var(--border))",
-                        color: quest.status === "completed" ? "hsl(var(--quest-green-bright))" : quest.status === "active" ? "hsl(var(--quest-gold))" : "hsl(var(--muted-foreground))",
-                        background: "hsl(var(--background))",
-                      }}>
-                      {quest.status === "completed" ? <Icon name="Check" size={12} color="hsl(var(--quest-green-bright))" /> : idx + 1}
-                    </div>
-                    {idx < branchQuestsWithStatus.length - 1 && (
-                      <div className="flex-1 w-px my-1"
-                        style={{ background: quest.status === "completed" ? "hsl(var(--quest-green) / 0.4)" : "hsl(var(--border))" }} />
-                    )}
-                  </div>
-                  <div className="flex-1 pb-3">
-                    <QuestCard quest={quest} onClick={setSelectedQuest} />
-                  </div>
+            <div className="diamond-divider mb-5"><div className="diamond" /></div>
+
+            <div className="space-y-0">
+              {branchQuestsWithStatus.map((q, i) => (
+                <div key={q.id}>
+                  {i > 0 && <VerticalConnector status={q.status ?? "locked"} />}
+                  <QuestCard quest={q} onClick={setSelectedQuest} index={i} />
                 </div>
               ))}
-              {(activeBranch.quests ?? []).length === 0 && (
-                <div className="text-center py-16 text-muted-foreground">
-                  <p className="font-crimson text-lg italic">В этой ветке пока нет квестов</p>
-                </div>
-              )}
             </div>
 
-            <div className="mt-8 pt-6 border-t" style={{ borderColor: "hsl(var(--border))" }}>
-              <div className="ornament mb-4"><span>ЛЕГЕНДА</span></div>
-              <div className="flex flex-wrap gap-6 justify-center">
-                {[
-                  { label: "Выполнено", icon: "CheckCircle", color: "hsl(var(--quest-green-bright))" },
-                  { label: "Активно", icon: "Circle", color: "hsl(var(--quest-gold))" },
-                  { label: "Заблокировано", icon: "Lock", color: "hsl(var(--muted-foreground))" },
-                ].map(item => (
-                  <div key={item.label} className="flex items-center gap-2">
-                    <Icon name={item.icon} size={14} color={item.color} fallback="Circle" />
-                    <span className="font-oswald text-xs tracking-wide text-muted-foreground">{item.label}</span>
-                  </div>
-                ))}
+            {branchQuestsWithStatus.length === 0 && (
+              <div className="text-center py-12 parchment-bg rounded-lg border" style={{ borderColor: "hsl(var(--border))" }}>
+                <Icon name="BookOpen" size={32} color="hsl(var(--muted-foreground))" />
+                <p className="font-crimson text-sm text-muted-foreground mt-3 italic">Квесты в этой ветке ещё не добавлены</p>
               </div>
-            </div>
+            )}
           </>
-        )}
-
-        {branches.length === 0 && (
-          <div className="text-center py-20">
-            <p className="font-cinzel text-xl" style={{ color: "hsl(var(--quest-gold))" }}>Книга пуста</p>
-            <p className="font-crimson text-muted-foreground mt-2 italic">Войдите как администратор, чтобы создать первые квесты</p>
-          </div>
         )}
       </main>
 
-      {activeSelectedQuest && (
-        <QuestModal quest={activeSelectedQuest} onClose={() => setSelectedQuest(null)} />
-      )}
+      {activeSelectedQuest && <QuestModal quest={activeSelectedQuest} onClose={() => setSelectedQuest(null)} />}
     </div>
   );
 }

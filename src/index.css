@@ -261,3 +261,232 @@
     transparent
   );
 }
+
+/* Floating particles */
+@keyframes float-up {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(30px) scale(0);
+    opacity: 0;
+  }
+}
+@keyframes float-drift {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(15px);
+  }
+}
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  25% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  75% {
+    opacity: 1;
+  }
+}
+@keyframes ember-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 4px hsl(30 90% 50% / 0.6),
+      0 0 8px hsl(30 90% 50% / 0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 8px hsl(30 90% 50% / 0.8),
+      0 0 20px hsl(30 90% 50% / 0.4);
+  }
+}
+@keyframes page-turn {
+  0% {
+    transform: perspective(800px) rotateY(-5deg);
+    opacity: 0;
+  }
+  100% {
+    transform: perspective(800px) rotateY(0deg);
+    opacity: 1;
+  }
+}
+@keyframes quill-write {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+@keyframes stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-page-turn {
+  animation: page-turn 0.5s ease-out forwards;
+}
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+.animate-stagger-in {
+  animation: stagger-in 0.4s ease-out both;
+}
+.animate-flicker {
+  animation: flicker 3s ease-in-out infinite;
+}
+
+/* Corner decorations */
+.corner-decor {
+  position: relative;
+}
+.corner-decor::before,
+.corner-decor::after {
+  content: "";
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: hsl(var(--quest-gold) / 0.25);
+  pointer-events: none;
+}
+.corner-decor::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid;
+  border-left: 2px solid;
+  border-top-left-radius: 4px;
+}
+.corner-decor::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid;
+  border-right: 2px solid;
+  border-bottom-right-radius: 4px;
+}
+
+/* Vignette overlay for pages */
+.vignette::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 60%,
+    hsl(var(--background) / 0.4) 100%
+  );
+}
+
+/* Quest card enhanced hover */
+.quest-card:not(.locked):hover {
+  box-shadow:
+    0 4px 20px hsl(var(--quest-gold) / 0.15),
+    0 0 0 1px hsl(var(--quest-gold) / 0.2);
+}
+.quest-card.completed:hover {
+  box-shadow:
+    0 4px 20px hsl(var(--quest-green) / 0.15),
+    0 0 0 1px hsl(var(--quest-green) / 0.2);
+}
+
+/* Divider with diamond */
+.diamond-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.diamond-divider::before,
+.diamond-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--quest-gold) / 0.3),
+    transparent
+  );
+}
+.diamond-divider .diamond {
+  width: 6px;
+  height: 6px;
+  transform: rotate(45deg);
+  background: hsl(var(--quest-gold) / 0.4);
+  flex-shrink: 0;
+}
+
+/* Ink blot texture for active tabs */
+.tab-active::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Ccircle cx='3' cy='3' r='1' fill='hsl(43,74%25,58%25)' opacity='0.06'/%3E%3C/svg%3E");
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Input focus glow */
+input:focus {
+  border-color: hsl(var(--quest-gold) / 0.5) !important;
+  box-shadow:
+    0 0 0 2px hsl(var(--quest-gold) / 0.1),
+    0 0 12px hsl(var(--quest-gold) / 0.08);
+}
+
+/* Button press effect */
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Subtle text shadow for headings */
+.text-glow {
+  text-shadow:
+    0 0 20px hsl(var(--quest-gold) / 0.3),
+    0 0 40px hsl(var(--quest-gold) / 0.1);
+}
+
+/* Scroll fade hint */
+.scroll-fade-right {
+  mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+}
+
+/* Selection color */
+::selection {
+  background: hsl(var(--quest-gold) / 0.3);
+  color: hsl(var(--foreground));
+}
