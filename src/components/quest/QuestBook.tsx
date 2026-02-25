@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { Branch, Quest, Rarity } from "./types";
+import { sfxQuestClick, sfxBranchSwitch, sfxModalOpen, sfxModalClose } from "./sounds";
 
 const RarityBadge = ({ rarity }: { rarity: Rarity }) => {
   const labels = { common: "Обычный", rare: "Редкий", epic: "Эпик" };
@@ -54,7 +55,7 @@ const QuestCard = ({ quest, onClick, index }: { quest: Quest; onClick: (q: Quest
     <div
       className={`quest-card parchment-bg rounded border p-3 animate-stagger-in ${status === "locked" ? "locked" : ""} ${status === "completed" ? "completed" : ""}`}
       style={{ animationDelay: `${index * 60}ms` }}
-      onClick={() => status !== "locked" && onClick(quest)}
+      onClick={() => { if (status !== "locked") { sfxQuestClick(); onClick(quest); } }}
     >
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0 w-10 h-10 rounded flex items-center justify-center transition-colors duration-300"
@@ -88,7 +89,7 @@ const QuestCard = ({ quest, onClick, index }: { quest: Quest; onClick: (q: Quest
 
 const QuestModal = ({ quest, onClose }: { quest: Quest; onClose: () => void }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => { sfxModalClose(); onClose(); }}>
       <div className="absolute inset-0" style={{ background: "hsl(var(--background) / 0.85)", backdropFilter: "blur(6px)" }} />
       <div className="relative w-full max-w-md parchment-bg rounded-lg border corner-decor animate-scale-in p-6"
         style={{ borderColor: "hsl(var(--quest-gold) / 0.4)", boxShadow: "0 0 60px hsl(var(--quest-gold) / 0.1), 0 25px 50px hsl(0 0% 0% / 0.5)" }}
@@ -140,7 +141,7 @@ const QuestModal = ({ quest, onClose }: { quest: Quest; onClose: () => void }) =
 
         <div className="flex">
           <button className="flex-1 py-2.5 rounded border font-oswald text-sm tracking-wider uppercase transition-all duration-200 hover:bg-secondary"
-            style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }} onClick={onClose}>
+            style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }} onClick={() => { sfxModalClose(); onClose(); }}>
             Закрыть
           </button>
         </div>
@@ -239,7 +240,7 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
               return (
                 <button
                   key={b.id}
-                  onClick={() => setActiveBranchId(b.id)}
+                  onClick={() => { sfxBranchSwitch(); setActiveBranchId(b.id); }}
                   className={`relative flex items-center gap-2 px-3 py-2 rounded border text-left flex-shrink-0 transition-all duration-200 ${isActive ? "tab-active" : "hover:bg-secondary/50"}`}
                   style={{ borderColor: isActive ? undefined : "hsl(var(--border))" }}
                 >
@@ -289,7 +290,7 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
               {branchQuestsWithStatus.map((q, i) => (
                 <div key={q.id}>
                   {i > 0 && <VerticalConnector status={q.status ?? "locked"} />}
-                  <QuestCard quest={q} onClick={setSelectedQuest} index={i} />
+                  <QuestCard quest={q} onClick={(quest) => { sfxModalOpen(); setSelectedQuest(quest); }} index={i} />
                 </div>
               ))}
             </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { sfxLogin, sfxError, sfxBranchSwitch } from "./sounds";
 
 interface LoginScreenProps {
   onLogin: (nick: string) => void;
@@ -100,14 +101,14 @@ export default function LoginScreen({ onLogin, onAdmin }: LoginScreenProps) {
                 placeholder="Steve..."
                 value={nick}
                 onChange={e => setNick(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && nick.trim() && onLogin(nick.trim())}
+                onKeyDown={e => { if (e.key === "Enter" && nick.trim()) { sfxLogin(); onLogin(nick.trim()); } }}
                 className="w-full bg-transparent border rounded px-3 py-2.5 font-crimson text-base mb-5 outline-none transition-all duration-300"
                 style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))" }}
                 autoFocus
               />
               <button
                 disabled={!nick.trim()}
-                onClick={() => nick.trim() && onLogin(nick.trim())}
+                onClick={() => { if (nick.trim()) { sfxLogin(); onLogin(nick.trim()); } }}
                 className="w-full py-3 rounded font-cinzel text-sm font-bold tracking-widest uppercase transition-all duration-200 disabled:opacity-40 hover:opacity-90 hover:shadow-lg"
                 style={{ background: "hsl(var(--quest-gold))", color: "hsl(var(--primary-foreground))", boxShadow: nick.trim() ? "0 4px 16px hsl(var(--quest-gold) / 0.3)" : "none" }}
               >
@@ -126,7 +127,7 @@ export default function LoginScreen({ onLogin, onAdmin }: LoginScreenProps) {
                   if (e.key === "Enter" && adminKey && !adminLoading) {
                     setAdminLoading(true);
                     const success = await onAdmin(adminKey);
-                    if (!success) { setAdminError(true); setAdminLoading(false); }
+                    if (success) { sfxLogin(); } else { sfxError(); setAdminError(true); setAdminLoading(false); }
                   }
                 }}
                 className="w-full bg-transparent border rounded px-3 py-2.5 font-crimson text-base outline-none transition-all duration-300"
@@ -143,7 +144,7 @@ export default function LoginScreen({ onLogin, onAdmin }: LoginScreenProps) {
                   if (!adminKey || adminLoading) return;
                   setAdminLoading(true);
                   const success = await onAdmin(adminKey);
-                  if (!success) { setAdminError(true); setAdminLoading(false); }
+                  if (success) { sfxLogin(); } else { sfxError(); setAdminError(true); setAdminLoading(false); }
                 }}
                 className="w-full py-3 rounded font-cinzel text-sm font-bold tracking-widest uppercase transition-all duration-200 disabled:opacity-40 hover:opacity-90"
                 style={{ background: "hsl(var(--quest-gold))", color: "hsl(var(--primary-foreground))", boxShadow: adminKey ? "0 4px 16px hsl(var(--quest-gold) / 0.3)" : "none" }}
@@ -156,7 +157,7 @@ export default function LoginScreen({ onLogin, onAdmin }: LoginScreenProps) {
 
         <button
           className="w-full mt-3 py-2 font-oswald text-xs tracking-wider uppercase text-muted-foreground hover:text-foreground transition-colors duration-300"
-          onClick={() => setAdminMode(m => !m)}
+          onClick={() => { sfxBranchSwitch(); setAdminMode(m => !m); }}
         >
           {adminMode ? "← Вернуться" : "Вход для администратора"}
         </button>
