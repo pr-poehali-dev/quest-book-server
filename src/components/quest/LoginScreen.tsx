@@ -2,13 +2,15 @@ import { useState } from "react";
 
 interface LoginScreenProps {
   onLogin: (nick: string) => void;
-  onAdmin: (key: string) => void;
+  onAdmin: (key: string) => Promise<boolean>;
 }
 
 export default function LoginScreen({ onLogin, onAdmin }: LoginScreenProps) {
   const [nick, setNick] = useState("");
   const [adminMode, setAdminMode] = useState(false);
   const [adminKey, setAdminKey] = useState("");
+  const [adminError, setAdminError] = useState(false);
+  const [adminLoading, setAdminLoading] = useState(false);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -56,19 +58,34 @@ export default function LoginScreen({ onLogin, onAdmin }: LoginScreenProps) {
                 type="password"
                 placeholder="••••••"
                 value={adminKey}
-                onChange={e => setAdminKey(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && adminKey && onAdmin(adminKey)}
-                className="w-full bg-transparent border rounded px-3 py-2.5 font-crimson text-base mb-5 outline-none"
-                style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))" }}
+                onChange={e => { setAdminKey(e.target.value); setAdminError(false); }}
+                onKeyDown={async e => {
+                  if (e.key === "Enter" && adminKey && !adminLoading) {
+                    setAdminLoading(true);
+                    const success = await onAdmin(adminKey);
+                    if (!success) { setAdminError(true); setAdminLoading(false); }
+                  }
+                }}
+                className="w-full bg-transparent border rounded px-3 py-2.5 font-crimson text-base outline-none"
+                style={{ borderColor: adminError ? "hsl(0 70% 50%)" : "hsl(var(--border))", color: "hsl(var(--foreground))" }}
                 autoFocus
               />
+              {adminError && (
+                <p className="font-crimson text-sm mt-1 mb-3" style={{ color: "hsl(0 70% 50%)" }}>Неверный пароль</p>
+              )}
+              {!adminError && <div className="mb-5" />}
               <button
-                disabled={!adminKey}
-                onClick={() => adminKey && onAdmin(adminKey)}
+                disabled={!adminKey || adminLoading}
+                onClick={async () => {
+                  if (!adminKey || adminLoading) return;
+                  setAdminLoading(true);
+                  const success = await onAdmin(adminKey);
+                  if (!success) { setAdminError(true); setAdminLoading(false); }
+                }}
                 className="w-full py-3 rounded font-cinzel text-sm font-bold tracking-widest uppercase transition-opacity disabled:opacity-40 hover:opacity-90"
                 style={{ background: "hsl(var(--quest-gold))", color: "hsl(var(--primary-foreground))" }}
               >
-                Войти в админку
+                {adminLoading ? "Проверка..." : "Войти в админку"}
               </button>
             </>
           )}

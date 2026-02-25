@@ -31,9 +31,15 @@ export default function Index() {
     loadProgress(nick);
   };
 
-  const handleAdmin = (key: string) => {
-    setAdminKey(key);
-    setShowAdmin(true);
+  const handleAdmin = async (key: string): Promise<boolean> => {
+    try {
+      await apiFetch("/players", { method: "GET" }, key);
+      setAdminKey(key);
+      setShowAdmin(true);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   if (!player && !showAdmin) {
