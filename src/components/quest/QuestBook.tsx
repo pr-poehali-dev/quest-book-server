@@ -117,12 +117,7 @@ const QuestCard = ({ quest, onClick, index }: { quest: Quest; onClick: (q: Quest
                 <Icon name="Gift" size={9} className="inline mr-0.5" />{quest.reward}
               </span>
             )}
-            {quest.xp > 0 && status !== "locked" && (
-              <span className="xp-badge text-[10px] font-oswald tracking-wide px-1.5 py-0.5 rounded transition-all cursor-default"
-                style={{ background: "hsl(var(--quest-gold) / 0.1)", color: "hsl(var(--quest-gold))", border: "1px solid hsl(var(--quest-gold) / 0.15)" }}>
-                +{quest.xp} XP
-              </span>
-            )}
+
           </div>
         </div>
       </div>
@@ -172,12 +167,7 @@ const QuestModal = ({ quest, onClose }: { quest: Quest; onClose: () => void }) =
             <span className="font-oswald text-xs tracking-widest uppercase text-muted-foreground">Награда</span>
           </div>
           <p className="font-crimson text-sm">{quest.reward}</p>
-          {quest.xp > 0 && (
-            <div className="mt-2 pt-2 border-t flex items-center gap-1.5" style={{ borderColor: "hsl(var(--quest-gold) / 0.15)" }}>
-              <Icon name="Zap" size={12} color="hsl(var(--quest-gold))" />
-              <span className="font-oswald text-xs tracking-wide" style={{ color: "hsl(var(--quest-gold))" }}>{quest.xp} XP</span>
-            </div>
-          )}
+
         </div>
 
         {quest.status === "completed" && (

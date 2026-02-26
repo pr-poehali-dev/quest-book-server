@@ -1014,11 +1014,6 @@ button:active:not(:disabled) {
   box-shadow: inset 0 0 6px hsl(210 80% 65% / 0.08);
 }
 
-/* XP counter pulse on hover */
-.xp-badge:hover {
-  animation: xp-count 0.4s ease;
-}
-
 /* Status dot ring pulse for active */
 .status-active-ring {
   position: absolute;

@@ -123,7 +123,7 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
 
   const addQuest = () => {
     if (!activeBranch) return;
-    const q: Partial<Quest> = { title: "Новый квест", description: "", reward: "", xp: 100, rarity: "common", icon: "Star", sort_order: 99 };
+    const q: Partial<Quest> = { title: "Новый квест", description: "", reward: "", xp: 0, rarity: "common", icon: "Star", sort_order: 99 };
     setEditingQuest({ ...q, id: 0 } as Quest);
     setForm(q);
   };
