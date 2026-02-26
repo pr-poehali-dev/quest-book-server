@@ -508,3 +508,596 @@ button:active:not(:disabled) {
   background: hsl(var(--quest-gold) / 0.3);
   color: hsl(var(--foreground));
 }
+
+/* ═══════════════════════════════════════
+   ENHANCED VISUAL EFFECTS
+   ═══════════════════════════════════════ */
+
+/* Ambient floating embers on quest page */
+@keyframes ember-rise {
+  0% {
+    transform: translateY(0) translateX(0) scale(0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(-10vh) translateX(5px) scale(1);
+  }
+  85% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(-20px) scale(0);
+    opacity: 0;
+  }
+}
+@keyframes ember-rise-alt {
+  0% {
+    transform: translateY(0) translateX(0) scale(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+    transform: translateY(-8vh) translateX(-8px) scale(1.2);
+  }
+  80% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-95vh) translateX(15px) scale(0);
+    opacity: 0;
+  }
+}
+@keyframes drift-slow {
+  0%,
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+  25% {
+    transform: translateX(8px) translateY(-3px);
+  }
+  50% {
+    transform: translateX(-4px) translateY(-6px);
+  }
+  75% {
+    transform: translateX(6px) translateY(-2px);
+  }
+}
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+@keyframes slide-glow {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+@keyframes torch-flicker {
+  0%,
+  100% {
+    opacity: 0.15;
+    filter: blur(25px);
+  }
+  20% {
+    opacity: 0.25;
+    filter: blur(30px);
+  }
+  40% {
+    opacity: 0.12;
+    filter: blur(22px);
+  }
+  60% {
+    opacity: 0.3;
+    filter: blur(28px);
+  }
+  80% {
+    opacity: 0.18;
+    filter: blur(26px);
+  }
+}
+@keyframes rarity-epic-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 6px hsl(270 70% 70% / 0.2),
+      inset 0 0 8px hsl(270 70% 70% / 0.03);
+  }
+  50% {
+    box-shadow:
+      0 0 18px hsl(270 70% 70% / 0.35),
+      inset 0 0 12px hsl(270 70% 70% / 0.06);
+  }
+}
+@keyframes rarity-rare-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 6px hsl(210 80% 65% / 0.15),
+      inset 0 0 6px hsl(210 80% 65% / 0.02);
+  }
+  50% {
+    box-shadow:
+      0 0 14px hsl(210 80% 65% / 0.25),
+      inset 0 0 10px hsl(210 80% 65% / 0.04);
+  }
+}
+@keyframes sparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+}
+@keyframes modal-reveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+    filter: blur(4px);
+  }
+  60% {
+    transform: scale(1.02) translateY(-4px);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+@keyframes modal-backdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes progress-shimmer {
+  0% {
+    left: -30%;
+  }
+  100% {
+    left: 130%;
+  }
+}
+@keyframes connector-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes xp-count {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes tab-select {
+  0% {
+    transform: scale(0.95);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Ambient background torches */
+.quest-ambient {
+  position: relative;
+}
+.quest-ambient::before {
+  content: "";
+  position: fixed;
+  top: 10%;
+  left: -5%;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    hsl(30 80% 40% / 0.2) 0%,
+    transparent 70%
+  );
+  animation: torch-flicker 5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+.quest-ambient::after {
+  content: "";
+  position: fixed;
+  bottom: 5%;
+  right: -5%;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    hsl(43 74% 50% / 0.15) 0%,
+    transparent 70%
+  );
+  animation: torch-flicker 7s ease-in-out infinite 2s;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Floating embers container */
+.embers-container {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+.ember {
+  position: absolute;
+  bottom: -10px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: hsl(30 90% 55%);
+  box-shadow:
+    0 0 6px hsl(30 90% 55% / 0.8),
+    0 0 12px hsl(43 74% 58% / 0.4);
+}
+.ember:nth-child(1) {
+  left: 8%;
+  animation: ember-rise 8s linear infinite 0s;
+}
+.ember:nth-child(2) {
+  left: 22%;
+  animation: ember-rise-alt 10s linear infinite 1.5s;
+  width: 2px;
+  height: 2px;
+}
+.ember:nth-child(3) {
+  left: 45%;
+  animation: ember-rise 12s linear infinite 3s;
+}
+.ember:nth-child(4) {
+  left: 68%;
+  animation: ember-rise-alt 9s linear infinite 0.8s;
+  width: 4px;
+  height: 4px;
+}
+.ember:nth-child(5) {
+  left: 85%;
+  animation: ember-rise 11s linear infinite 4s;
+  width: 2px;
+  height: 2px;
+}
+.ember:nth-child(6) {
+  left: 35%;
+  animation: ember-rise-alt 13s linear infinite 6s;
+}
+.ember:nth-child(7) {
+  left: 55%;
+  animation: ember-rise 7s linear infinite 2s;
+  width: 2px;
+  height: 2px;
+}
+.ember:nth-child(8) {
+  left: 92%;
+  animation: ember-rise-alt 14s linear infinite 5s;
+  width: 3px;
+  height: 3px;
+}
+
+/* Rarity glow effects on quest cards */
+.quest-card.rarity-epic {
+  animation: rarity-epic-glow 3s ease-in-out infinite;
+}
+.quest-card.rarity-epic::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    hsl(270 70% 70% / 0.04) 0%,
+    transparent 50%,
+    hsl(270 70% 70% / 0.02) 100%
+  );
+  pointer-events: none;
+}
+.quest-card.rarity-rare {
+  animation: rarity-rare-glow 3.5s ease-in-out infinite;
+}
+.quest-card.rarity-rare::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    hsl(210 80% 65% / 0.03) 0%,
+    transparent 50%,
+    hsl(210 80% 65% / 0.02) 100%
+  );
+  pointer-events: none;
+}
+
+/* Card hover enhanced glow */
+.quest-card:not(.locked):hover {
+  transform: translateY(-3px) scale(1.01);
+}
+.quest-card.rarity-epic:not(.locked):hover {
+  box-shadow:
+    0 6px 24px hsl(270 70% 70% / 0.2),
+    0 0 0 1px hsl(270 70% 70% / 0.3),
+    inset 0 0 20px hsl(270 70% 70% / 0.04);
+}
+.quest-card.rarity-rare:not(.locked):hover {
+  box-shadow:
+    0 6px 24px hsl(210 80% 65% / 0.18),
+    0 0 0 1px hsl(210 80% 65% / 0.25),
+    inset 0 0 20px hsl(210 80% 65% / 0.03);
+}
+
+/* Sparkle decoration on completed cards */
+.quest-sparkle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  pointer-events: none;
+}
+.quest-sparkle::before,
+.quest-sparkle::after {
+  content: "";
+  position: absolute;
+  background: hsl(var(--quest-green-bright));
+  border-radius: 50%;
+}
+.quest-sparkle::before {
+  width: 100%;
+  height: 2px;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+.quest-sparkle::after {
+  width: 2px;
+  height: 100%;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+}
+.sparkle-1 {
+  top: 6px;
+  right: 12px;
+  animation: sparkle 3s ease-in-out infinite 0.5s;
+}
+.sparkle-2 {
+  top: 50%;
+  right: 28px;
+  animation: sparkle 4s ease-in-out infinite 1.8s;
+}
+.sparkle-3 {
+  bottom: 8px;
+  right: 8px;
+  animation: sparkle 3.5s ease-in-out infinite 0.2s;
+}
+
+/* Vertical connector pulse for active */
+.connector-active {
+  position: relative;
+}
+.connector-active::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 100%;
+  background: hsl(var(--quest-gold) / 0.3);
+  border-radius: 2px;
+  animation: connector-pulse 2s ease-in-out infinite;
+}
+
+/* Enhanced modal */
+.animate-modal-reveal {
+  animation: modal-reveal 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.animate-modal-backdrop {
+  animation: modal-backdrop 0.3s ease-out forwards;
+}
+
+/* Modal inner particles (CSS-only) */
+.modal-particles::before,
+.modal-particles::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: drift-slow 6s ease-in-out infinite;
+}
+.modal-particles::before {
+  width: 80px;
+  height: 80px;
+  top: -20px;
+  right: -20px;
+  background: radial-gradient(
+    circle,
+    hsl(var(--quest-gold) / 0.08) 0%,
+    transparent 70%
+  );
+}
+.modal-particles::after {
+  width: 60px;
+  height: 60px;
+  bottom: -15px;
+  left: -15px;
+  background: radial-gradient(
+    circle,
+    hsl(var(--quest-gold) / 0.06) 0%,
+    transparent 70%
+  );
+  animation-delay: 3s;
+}
+
+/* Progress bar shimmer */
+.progress-bar-fill {
+  position: relative;
+  overflow: hidden;
+}
+.progress-bar-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -30%;
+  width: 30%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(0 0% 100% / 0.3),
+    transparent
+  );
+  animation: progress-shimmer 2.5s ease-in-out infinite;
+}
+
+/* Animated tab selection */
+.tab-active {
+  animation: tab-select 0.3s ease-out;
+}
+
+/* Completed quest strike-through effect */
+.quest-card.completed .quest-title-text {
+  position: relative;
+}
+.quest-card.completed .quest-title-text::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 1px;
+  background: hsl(var(--quest-green) / 0.4);
+  transform: translateY(-50%);
+}
+
+/* Rarity badge glow */
+.badge-epic {
+  text-shadow: 0 0 8px hsl(270 70% 70% / 0.4);
+  box-shadow: inset 0 0 8px hsl(270 70% 70% / 0.1);
+}
+.badge-rare {
+  text-shadow: 0 0 6px hsl(210 80% 65% / 0.3);
+  box-shadow: inset 0 0 6px hsl(210 80% 65% / 0.08);
+}
+
+/* XP counter pulse on hover */
+.xp-badge:hover {
+  animation: xp-count 0.4s ease;
+}
+
+/* Status dot ring pulse for active */
+.status-active-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid hsl(var(--quest-gold) / 0.4);
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+/* Card slide-in glow line */
+.quest-card:not(.locked)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 0;
+  background: linear-gradient(
+    to bottom,
+    hsl(var(--quest-gold) / 0.6),
+    transparent
+  );
+  transition: height 0.4s ease;
+  border-radius: 1px;
+  z-index: 2;
+}
+.quest-card:not(.locked):hover::before {
+  height: 100%;
+}
+.quest-card.completed::before {
+  background: linear-gradient(
+    to bottom,
+    hsl(var(--quest-green) / 0.6),
+    transparent
+  ) !important;
+}
+
+/* Vignette enhanced with warm tones */
+.vignette-warm::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 50%,
+      hsl(var(--background) / 0.5) 100%
+    ),
+    radial-gradient(
+      ellipse at 50% 100%,
+      hsl(30 60% 15% / 0.15) 0%,
+      transparent 50%
+    );
+}
+
+/* Header gold underline animation */
+.header-glow-line {
+  position: relative;
+  overflow: hidden;
+}
+.header-glow-line::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--quest-gold) / 0.5),
+    transparent
+  );
+}
+
+/* Scroll indicator fade */
+.quest-list-scroll {
+  mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+}
