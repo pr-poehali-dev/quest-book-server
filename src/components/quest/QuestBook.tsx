@@ -290,7 +290,7 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
               {branchQuestsWithStatus.map((q, i) => (
                 <div key={q.id}>
                   {i > 0 && <VerticalConnector status={q.status ?? "locked"} />}
-                  <QuestCard quest={q} onClick={(quest) => { sfxModalOpen(); setSelectedQuest(quest); }} index={i} />
+                  <QuestCard quest={q} onClick={setSelectedQuest} index={i} />
                 </div>
               ))}
             </div>
