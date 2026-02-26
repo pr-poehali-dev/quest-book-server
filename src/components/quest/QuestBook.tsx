@@ -53,16 +53,26 @@ const QuestCard = ({ quest, onClick, index }: { quest: Quest; onClick: (q: Quest
   const status = quest.status ?? "locked";
   return (
     <div
-      className={`quest-card parchment-bg rounded border p-3 animate-stagger-in ${status === "locked" ? "locked" : ""} ${status === "completed" ? "completed" : ""}`}
+      className={`quest-card parchment-bg rounded border p-3 animate-stagger-in ${status === "locked" ? "locked" : ""} ${status === "completed" ? "completed" : ""} ${status === "active" ? "quest-active" : ""}`}
       style={{ animationDelay: `${index * 60}ms` }}
       onClick={() => { if (status !== "locked") onClick(quest); }}
     >
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 w-10 h-10 rounded flex items-center justify-center transition-colors duration-300"
-          style={{ background: status === "completed" ? "hsl(var(--quest-green) / 0.2)" : status === "active" ? "hsl(var(--quest-gold) / 0.15)" : "hsl(var(--muted))" }}>
-          <Icon name={quest.icon} size={20} fallback="Star"
-            color={status === "completed" ? "hsl(var(--quest-green-bright))" : status === "active" ? "hsl(var(--quest-gold))" : "hsl(var(--muted-foreground))"}
-          />
+        <div className="relative flex-shrink-0">
+          <div className="w-10 h-10 rounded flex items-center justify-center transition-colors duration-300"
+            style={{ background: status === "completed" ? "hsl(var(--quest-green) / 0.2)" : status === "active" ? "hsl(var(--quest-gold) / 0.15)" : "hsl(var(--muted))" }}>
+            <Icon name={quest.icon} size={20} fallback="Star"
+              color={status === "completed" ? "hsl(var(--quest-green-bright))" : status === "active" ? "hsl(var(--quest-gold))" : "hsl(var(--muted-foreground))"}
+            />
+          </div>
+          <span className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full flex items-center justify-center font-oswald text-[9px] font-bold"
+            style={{
+              background: status === "completed" ? "hsl(var(--quest-green))" : status === "active" ? "hsl(var(--quest-gold))" : "hsl(var(--muted))",
+              color: status === "locked" ? "hsl(var(--muted-foreground))" : "hsl(var(--background))",
+              border: `1.5px solid hsl(var(--background))`
+            }}>
+            {index + 1}
+          </span>
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2 mb-0.5">
@@ -150,15 +160,12 @@ const QuestModal = ({ quest, onClose }: { quest: Quest; onClose: () => void }) =
   );
 };
 
-const BranchProgress = ({ completed, total }: { completed: number; total: number }) => {
-  const pct = total > 0 ? (completed / total) * 100 : 0;
+const BranchQuestCount = ({ total }: { total: number }) => {
+  const label = total === 1 ? "задание" : total < 5 ? "задания" : "заданий";
   return (
-    <div className="flex items-center gap-2">
-      <div className="h-1.5 flex-1 rounded-full overflow-hidden" style={{ background: "hsl(var(--muted))" }}>
-        <div className="h-full rounded-full progress-bar-fill" style={{ width: `${pct}%` }} />
-      </div>
-      <span className="font-oswald text-[10px] tracking-wider text-muted-foreground whitespace-nowrap">{completed}/{total}</span>
-    </div>
+    <span className="font-crimson text-xs italic text-muted-foreground/70">
+      {total} {label}
+    </span>
   );
 };
 
@@ -237,6 +244,7 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
               const bCompleted = (b.quests ?? []).filter(q => completedIds.includes(q.id)).length;
               const bTotal = (b.quests ?? []).length;
               const isActive = b.id === activeBranchId;
+              const allDone = bCompleted === bTotal && bTotal > 0;
               return (
                 <button
                   key={b.id}
@@ -245,12 +253,9 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
                   style={{ borderColor: isActive ? undefined : "hsl(var(--border))" }}
                 >
                   <Icon name={b.icon} size={15} fallback="Star" color={isActive ? "hsl(var(--quest-gold))" : "hsl(var(--muted-foreground))"} />
-                  <div>
-                    <span className="font-oswald text-xs tracking-wider block leading-tight">{b.title}</span>
-                    <span className="font-crimson text-[10px] text-muted-foreground">{bCompleted}/{bTotal}</span>
-                  </div>
-                  {bCompleted === bTotal && bTotal > 0 && (
-                    <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center ml-1"
+                  <span className="font-oswald text-xs tracking-wider leading-tight">{b.title}</span>
+                  {allDone && (
+                    <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center"
                       style={{ background: "hsl(var(--quest-green))" }}>
                       <Icon name="Check" size={8} color="white" />
                     </div>
@@ -272,16 +277,15 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
                   <Icon name={activeBranch.icon} size={16} color={activeBranch.color} fallback="Star" />
                 </div>
                 <div className="flex-1">
-                  <h2 className="font-cinzel text-lg font-bold" style={{ color: activeBranch.color }}>{activeBranch.title}</h2>
+                  <div className="flex items-baseline gap-3">
+                    <h2 className="font-cinzel text-lg font-bold" style={{ color: activeBranch.color }}>{activeBranch.title}</h2>
+                    <BranchQuestCount total={(activeBranch.quests ?? []).length} />
+                  </div>
                   {activeBranch.description && (
                     <p className="font-crimson text-sm italic text-muted-foreground">{activeBranch.description}</p>
                   )}
                 </div>
               </div>
-              <BranchProgress
-                completed={(activeBranch.quests ?? []).filter(q => completedIds.includes(q.id)).length}
-                total={(activeBranch.quests ?? []).length}
-              />
             </div>
 
             <div className="diamond-divider mb-5"><div className="diamond" /></div>
@@ -294,6 +298,14 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
                 </div>
               ))}
             </div>
+
+            {branchQuestsWithStatus.length > 0 && (
+              <div className="mt-6 flex items-center justify-center gap-3 opacity-30">
+                <div className="h-px w-12" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--quest-gold) / 0.5))" }} />
+                <Icon name="Feather" size={12} color="hsl(var(--quest-gold))" />
+                <div className="h-px w-12" style={{ background: "linear-gradient(90deg, hsl(var(--quest-gold) / 0.5), transparent)" }} />
+              </div>
+            )}
 
             {branchQuestsWithStatus.length === 0 && (
               <div className="text-center py-12 parchment-bg rounded-lg border" style={{ borderColor: "hsl(var(--border))" }}>
