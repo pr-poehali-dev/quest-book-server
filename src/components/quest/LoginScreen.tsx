@@ -83,7 +83,7 @@ export default function LoginScreen({ onLogin, onAdmin }: LoginScreenProps) {
             />
           </div>
           <h1 className="font-cinzel text-4xl font-black mb-2 gold-shimmer text-glow">Quest Book RPM</h1>
-          <p className="font-crimson text-lg italic text-muted-foreground">Книга Мэрии RPM</p>
+          <p className="font-crimson text-lg italic text-muted-foreground">Книга Армии RPM</p>
 
           <div className="diamond-divider mt-4 max-w-[200px] mx-auto">
             <div className="diamond" />

@@ -258,7 +258,7 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
             </div>
             <div>
               <h1 className="font-cinzel text-lg font-bold leading-none gold-shimmer">Quest Book RPM</h1>
-              <p className="font-crimson text-xs italic text-muted-foreground">Книга Мэрии RPM</p>
+              <p className="font-crimson text-xs italic text-muted-foreground">Книга Армии RPM</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
