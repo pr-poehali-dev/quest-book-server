@@ -4,59 +4,55 @@
 
 @layer base {
   :root {
-    --background: 80 8% 7%;
-    --foreground: 60 20% 85%;
+    --background: 28 20% 8%;
+    --foreground: 38 32% 88%;
 
-    --card: 80 8% 10%;
-    --card-foreground: 60 20% 85%;
+    --card: 28 18% 11%;
+    --card-foreground: 38 32% 88%;
 
-    --popover: 80 8% 10%;
-    --popover-foreground: 60 20% 85%;
+    --popover: 28 18% 11%;
+    --popover-foreground: 38 32% 88%;
 
-    --primary: 45 55% 50%;
-    --primary-foreground: 80 10% 8%;
+    --primary: 40 70% 58%;
+    --primary-foreground: 28 20% 8%;
 
-    --secondary: 80 6% 16%;
-    --secondary-foreground: 60 15% 75%;
+    --secondary: 28 14% 16%;
+    --secondary-foreground: 38 25% 78%;
 
-    --muted: 80 6% 13%;
-    --muted-foreground: 70 8% 50%;
+    --muted: 28 12% 14%;
+    --muted-foreground: 36 16% 55%;
 
-    --accent: 30 35% 30%;
-    --accent-foreground: 60 20% 85%;
+    --accent: 20 45% 35%;
+    --accent-foreground: 38 32% 88%;
 
-    --destructive: 0 60% 40%;
-    --destructive-foreground: 60 20% 85%;
+    --destructive: 0 60% 45%;
+    --destructive-foreground: 38 32% 88%;
 
-    --border: 75 10% 18%;
-    --input: 75 10% 18%;
-    --ring: 45 55% 50%;
+    --border: 32 18% 20%;
+    --input: 32 18% 20%;
+    --ring: 40 70% 58%;
 
-    --radius: 0.125rem;
+    --radius: 0.375rem;
 
-    /* Military theme */
-    --quest-gold: 45 55% 50%;
-    --quest-gold-dark: 40 45% 35%;
-    --quest-brown: 80 15% 15%;
-    --quest-brown-light: 80 12% 22%;
-    --quest-green: 100 35% 30%;
-    --quest-green-bright: 90 45% 45%;
-    --quest-red: 0 65% 40%;
-    --quest-parchment: 50 25% 70%;
-    --quest-ink: 80 15% 10%;
-    --quest-khaki: 60 20% 40%;
-    --quest-olive: 75 30% 25%;
-    --quest-camo: 90 15% 18%;
-    --quest-steel: 210 8% 35%;
+    /* Classic book theme */
+    --quest-gold: 40 70% 58%;
+    --quest-gold-dark: 38 55% 42%;
+    --quest-brown: 25 35% 20%;
+    --quest-brown-light: 25 28% 28%;
+    --quest-green: 130 35% 36%;
+    --quest-green-bright: 130 45% 48%;
+    --quest-red: 5 60% 48%;
+    --quest-parchment: 40 45% 82%;
+    --quest-ink: 225 25% 16%;
 
-    --sidebar-background: 80 8% 6%;
-    --sidebar-foreground: 60 15% 75%;
-    --sidebar-primary: 45 55% 50%;
-    --sidebar-primary-foreground: 80 10% 8%;
-    --sidebar-accent: 80 8% 12%;
-    --sidebar-accent-foreground: 60 15% 75%;
-    --sidebar-border: 75 10% 14%;
-    --sidebar-ring: 45 55% 50%;
+    --sidebar-background: 28 20% 7%;
+    --sidebar-foreground: 38 25% 78%;
+    --sidebar-primary: 40 70% 58%;
+    --sidebar-primary-foreground: 28 20% 8%;
+    --sidebar-accent: 28 14% 13%;
+    --sidebar-accent-foreground: 38 25% 78%;
+    --sidebar-border: 32 18% 16%;
+    --sidebar-ring: 40 70% 58%;
   }
 }
 
@@ -67,31 +63,19 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: "Oswald", "Crimson Text", Georgia, sans-serif;
+    font-family: "Crimson Text", Georgia, serif;
     background-color: hsl(var(--background));
     background-image:
       radial-gradient(
-        ellipse at 20% 50%,
-        hsl(80 15% 12% / 0.7) 0%,
+        ellipse at 20% 30%,
+        hsl(28 25% 12% / 0.8) 0%,
         transparent 60%
       ),
       radial-gradient(
-        ellipse at 80% 20%,
-        hsl(75 20% 10% / 0.5) 0%,
-        transparent 50%
-      ),
-      linear-gradient(
-        135deg,
-        transparent 0%,
-        transparent 49%,
-        hsl(80 10% 12% / 0.2) 50%,
-        transparent 51%,
-        transparent 100%
+        ellipse at 80% 70%,
+        hsl(20 30% 10% / 0.6) 0%,
+        transparent 55%
       );
-    background-size:
-      auto,
-      auto,
-      20px 20px;
   }
 }
 
@@ -264,14 +248,14 @@
 }
 
 .badge-rare {
-  color: hsl(90 50% 60%);
-  border-color: hsl(90 50% 60% / 0.4);
-  background: hsl(90 50% 30% / 0.15);
+  color: hsl(210 75% 68%);
+  border-color: hsl(210 75% 68% / 0.35);
+  background: hsl(210 60% 40% / 0.12);
 }
 .badge-epic {
-  color: hsl(40 80% 60%);
-  border-color: hsl(40 80% 60% / 0.4);
-  background: hsl(40 80% 30% / 0.15);
+  color: hsl(275 65% 72%);
+  border-color: hsl(275 65% 72% / 0.35);
+  background: hsl(275 55% 45% / 0.12);
 }
 .badge-common {
   color: hsl(var(--muted-foreground));
@@ -632,26 +616,26 @@ button:active:not(:disabled) {
   0%,
   100% {
     box-shadow:
-      0 0 6px hsl(40 80% 60% / 0.2),
-      inset 0 0 8px hsl(40 80% 60% / 0.03);
+      0 0 6px hsl(275 65% 72% / 0.2),
+      inset 0 0 8px hsl(275 65% 72% / 0.03);
   }
   50% {
     box-shadow:
-      0 0 18px hsl(40 80% 60% / 0.35),
-      inset 0 0 12px hsl(40 80% 60% / 0.06);
+      0 0 18px hsl(275 65% 72% / 0.35),
+      inset 0 0 12px hsl(275 65% 72% / 0.06);
   }
 }
 @keyframes rarity-rare-glow {
   0%,
   100% {
     box-shadow:
-      0 0 6px hsl(90 50% 60% / 0.15),
-      inset 0 0 6px hsl(90 50% 60% / 0.02);
+      0 0 6px hsl(210 75% 68% / 0.15),
+      inset 0 0 6px hsl(210 75% 68% / 0.02);
   }
   50% {
     box-shadow:
-      0 0 14px hsl(90 50% 60% / 0.25),
-      inset 0 0 10px hsl(90 50% 60% / 0.04);
+      0 0 14px hsl(210 75% 68% / 0.25),
+      inset 0 0 10px hsl(210 75% 68% / 0.04);
   }
 }
 @keyframes sparkle {
@@ -1118,72 +1102,17 @@ button:active:not(:disabled) {
 }
 
 /* ═══════════════════════════════════════
-   MILITARY THEME
+   CLASSIC BOOK THEME
    ═══════════════════════════════════════ */
 
-/* Camo / stencil texture */
-.camo-bg {
-  background-color: hsl(var(--card));
-  background-image:
-    radial-gradient(
-      circle at 20% 30%,
-      hsl(75 20% 18% / 0.5) 0%,
-      transparent 25%
-    ),
-    radial-gradient(
-      circle at 70% 60%,
-      hsl(80 25% 14% / 0.5) 0%,
-      transparent 30%
-    ),
-    radial-gradient(
-      circle at 50% 90%,
-      hsl(90 15% 16% / 0.4) 0%,
-      transparent 25%
-    ),
-    radial-gradient(
-      circle at 90% 10%,
-      hsl(70 20% 13% / 0.5) 0%,
-      transparent 20%
-    );
-}
-
-/* Stencil text - military style */
-.stencil {
-  font-family: "Oswald", sans-serif;
+/* Elegant book heading */
+.book-title {
+  font-family: "Cinzel", Georgia, serif;
   font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  text-shadow:
-    1px 0 0 hsl(var(--background)),
-    -1px 0 0 hsl(var(--background)),
-    0 1px 0 hsl(var(--background));
+  letter-spacing: 0.04em;
 }
 
-/* Dog tag style card */
-.dog-tag {
-  background: linear-gradient(
-    135deg,
-    hsl(var(--quest-olive)) 0%,
-    hsl(var(--quest-camo)) 100%
-  );
-  border: 1px solid hsl(var(--quest-khaki) / 0.4);
-  border-radius: 4px;
-  position: relative;
-}
-.dog-tag::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: -4px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: hsl(var(--background));
-  border: 1px solid hsl(var(--quest-khaki) / 0.5);
-  transform: translateY(-50%);
-}
-
-/* Military star decoration */
+/* Illuminated first letter / gold star pulse */
 @keyframes star-pulse {
   0%,
   100% {
@@ -1191,106 +1120,102 @@ button:active:not(:disabled) {
     filter: drop-shadow(0 0 4px hsl(var(--quest-gold) / 0.4));
   }
   50% {
-    transform: scale(1.08);
-    filter: drop-shadow(0 0 12px hsl(var(--quest-gold) / 0.7));
+    transform: scale(1.12);
+    filter: drop-shadow(0 0 12px hsl(var(--quest-gold) / 0.65));
   }
 }
-.military-star {
-  animation: star-pulse 3s ease-in-out infinite;
+.star-glow {
+  animation: star-pulse 3.5s ease-in-out infinite;
 }
 
-/* Rank stripes (chevron) */
-.chevron-divider {
+/* Ornate divider with flourish */
+.flourish-divider {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 10px;
   color: hsl(var(--quest-gold) / 0.5);
 }
-.chevron-divider::before,
-.chevron-divider::after {
+.flourish-divider::before,
+.flourish-divider::after {
   content: "";
   flex: 1;
-  height: 0;
-  border-top: 2px solid hsl(var(--quest-gold) / 0.3);
-  border-bottom: 1px solid hsl(var(--quest-gold) / 0.15);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--quest-gold) / 0.4),
+    transparent
+  );
 }
 
-/* Riveted border (looks like metal plates) */
-.riveted {
-  position: relative;
-  border: 1px solid hsl(var(--quest-khaki) / 0.4);
-}
-.riveted::before,
-.riveted::after {
-  content: "";
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: hsl(var(--quest-gold) / 0.6);
-  box-shadow:
-    0 0 4px hsl(var(--quest-gold) / 0.3),
-    inset 0 1px 1px hsl(0 0% 0% / 0.4);
-}
-.riveted::before {
-  top: 6px;
-  left: 6px;
-}
-.riveted::after {
-  bottom: 6px;
-  right: 6px;
-}
-
-/* Tactical grid background */
-.tactical-grid {
-  background-image:
-    linear-gradient(hsl(var(--quest-khaki) / 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, hsl(var(--quest-khaki) / 0.05) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-/* Status pin (like rank insignia) */
-.rank-pin {
+/* Wax seal / medallion for player avatar */
+.wax-seal {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(
-    135deg,
+  background: radial-gradient(
+    circle at 35% 30%,
     hsl(var(--quest-gold)) 0%,
-    hsl(var(--quest-gold-dark)) 100%
+    hsl(var(--quest-gold-dark)) 70%,
+    hsl(38 50% 32%) 100%
   );
   border: 1px solid hsl(var(--quest-gold-dark));
   box-shadow:
-    inset 0 1px 0 hsl(45 60% 65% / 0.6),
-    inset 0 -1px 0 hsl(40 40% 25% / 0.6),
-    0 2px 4px hsl(0 0% 0% / 0.4);
+    inset 0 1px 2px hsl(45 80% 78% / 0.6),
+    inset 0 -2px 3px hsl(30 50% 25% / 0.5),
+    0 2px 6px hsl(0 0% 0% / 0.4);
 }
 
-/* Military button (metallic look) */
-.btn-military {
+/* Gold bookmark ribbon */
+.ribbon {
+  position: relative;
   background: linear-gradient(
     180deg,
-    hsl(var(--quest-olive)) 0%,
-    hsl(80 25% 18%) 100%
+    hsl(var(--quest-red)) 0%,
+    hsl(5 55% 38%) 100%
   );
-  border: 1px solid hsl(var(--quest-khaki) / 0.5);
+  box-shadow: 0 2px 6px hsl(0 0% 0% / 0.35);
+}
+.ribbon::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background:
+    linear-gradient(45deg, hsl(5 55% 38%) 50%, transparent 50%),
+    linear-gradient(-45deg, hsl(5 55% 38%) 50%, transparent 50%);
+  background-size: 50% 100%;
+  background-repeat: no-repeat;
+  background-position: left, right;
+}
+
+/* Leather / book button */
+.btn-book {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--quest-brown-light)) 0%,
+    hsl(var(--quest-brown)) 100%
+  );
+  border: 1px solid hsl(var(--quest-gold) / 0.3);
   color: hsl(var(--foreground));
   box-shadow:
-    inset 0 1px 0 hsl(var(--quest-khaki) / 0.3),
+    inset 0 1px 0 hsl(var(--quest-gold) / 0.15),
     inset 0 -1px 0 hsl(0 0% 0% / 0.4),
     0 2px 6px hsl(0 0% 0% / 0.3);
-  transition: all 0.2s;
+  transition: all 0.25s;
 }
-.btn-military:hover:not(:disabled) {
-  background: linear-gradient(180deg, hsl(75 30% 28%) 0%, hsl(80 25% 18%) 100%);
+.btn-book:hover:not(:disabled) {
+  border-color: hsl(var(--quest-gold) / 0.55);
   box-shadow:
-    inset 0 1px 0 hsl(var(--quest-khaki) / 0.4),
-    0 0 12px hsl(var(--quest-gold) / 0.15),
-    0 2px 8px hsl(0 0% 0% / 0.4);
+    inset 0 1px 0 hsl(var(--quest-gold) / 0.2),
+    0 0 14px hsl(var(--quest-gold) / 0.15),
+    0 2px 10px hsl(0 0% 0% / 0.4);
 }
-.btn-military-gold {
+.btn-book-gold {
   background: linear-gradient(
     180deg,
     hsl(var(--quest-gold)) 0%,
@@ -1299,87 +1224,36 @@ button:active:not(:disabled) {
   border: 1px solid hsl(var(--quest-gold-dark));
   color: hsl(var(--primary-foreground));
   box-shadow:
-    inset 0 1px 0 hsl(45 70% 70% / 0.5),
-    inset 0 -1px 0 hsl(40 40% 25% / 0.4),
-    0 2px 8px hsl(0 0% 0% / 0.3),
-    0 0 16px hsl(var(--quest-gold) / 0.2);
+    inset 0 1px 0 hsl(45 80% 78% / 0.5),
+    inset 0 -1px 0 hsl(30 50% 25% / 0.4),
+    0 2px 10px hsl(0 0% 0% / 0.3),
+    0 0 18px hsl(var(--quest-gold) / 0.2);
+  transition: all 0.25s;
+}
+.btn-book-gold:hover:not(:disabled) {
+  box-shadow:
+    inset 0 1px 0 hsl(45 80% 82% / 0.6),
+    0 2px 12px hsl(0 0% 0% / 0.35),
+    0 0 26px hsl(var(--quest-gold) / 0.35);
 }
 
-/* Stamp / classified mark */
-@keyframes stamp-fade {
-  from {
-    opacity: 0;
-    transform: rotate(-15deg) scale(1.3);
-  }
-  to {
-    opacity: 0.7;
-    transform: rotate(-8deg) scale(1);
-  }
-}
-.stamp {
-  display: inline-block;
-  padding: 4px 12px;
-  border: 2px solid hsl(var(--quest-red) / 0.6);
-  color: hsl(var(--quest-red) / 0.9);
-  font-family: "Oswald", sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  font-size: 12px;
-  transform: rotate(-8deg);
-  opacity: 0.7;
-  animation: stamp-fade 0.6s ease-out;
-}
-
-/* Tactical scan line on hero */
-@keyframes tactical-scan {
-  0% {
-    transform: translateY(-100%);
-  }
-  100% {
-    transform: translateY(100%);
-  }
-}
-.tactical-scan-line {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  border-radius: inherit;
-}
-.tactical-scan-line::before {
+/* Aged paper texture for cards */
+.paper-texture::before {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    hsl(var(--quest-gold) / 0.4),
-    transparent
-  );
-  animation: tactical-scan 4s linear infinite;
-}
-
-/* Adjust parchment to military canvas */
-.parchment-bg {
-  background: linear-gradient(
-    135deg,
-    hsl(var(--card)) 0%,
-    hsl(80 10% 12%) 100%
-  ) !important;
-}
-.parchment-bg::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Crect width='6' height='6' fill='none'/%3E%3Cpath d='M0 6L6 0' stroke='hsl(75,15%,25%)' stroke-width='0.3' opacity='0.2'/%3E%3C/svg%3E") !important;
-}
-
-/* Override gold-shimmer to be more metallic */
-.gold-shimmer {
-  background: linear-gradient(
-    90deg,
-    hsl(var(--quest-gold-dark)) 0%,
-    hsl(45 70% 65%) 50%,
-    hsl(var(--quest-gold-dark)) 100%
-  ) !important;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    radial-gradient(
+      circle at 15% 20%,
+      hsl(40 30% 30% / 0.06) 0%,
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 85% 75%,
+      hsl(30 25% 25% / 0.06) 0%,
+      transparent 35%
+    );
 }

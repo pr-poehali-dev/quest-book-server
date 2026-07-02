@@ -4,7 +4,7 @@ import { Quest, Rarity } from "./types";
 const ICONS_LIST = ["Star", "Sword", "Shield", "Target", "Swords", "Moon", "MapPin", "Map", "Anchor", "Globe", "Compass", "Wrench", "FlaskConical", "Sparkles", "Crown", "Trophy", "UserPlus", "ShoppingBag", "Flag", "Hammer", "Zap", "Flame", "Heart", "Gift"];
 
 export const RarityBadge = ({ rarity }: { rarity: Rarity }) => {
-  const labels = { common: "Обычный", rare: "Редкий", epic: "Эпик" };
+  const labels = { common: "Обычный", rare: "Редкий", epic: "Легендарный" };
   return (
     <span className={`text-[10px] font-oswald tracking-widest uppercase px-2 py-0.5 rounded border badge-${rarity}`}>
       {labels[rarity]}
@@ -45,7 +45,7 @@ export default function AdminQuestFormCard({ form, setForm, onSave, onCancel, is
           <select className={inp} style={st} value={form.rarity ?? "common"} onChange={e => setForm(p => ({ ...p, rarity: e.target.value as Rarity }))}>
             <option value="common">Обычный</option>
             <option value="rare">Редкий</option>
-            <option value="epic">Эпик</option>
+            <option value="epic">Легендарный</option>
           </select>
         </div>
         <div className="col-span-2">

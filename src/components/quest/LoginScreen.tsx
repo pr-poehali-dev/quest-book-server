@@ -42,8 +42,8 @@ const FloatingParticles = () => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 2);
-        gradient.addColorStop(0, `hsla(43, 74%, 58%, ${p.opacity})`);
-        gradient.addColorStop(1, `hsla(43, 74%, 58%, 0)`);
+        gradient.addColorStop(0, `hsla(40, 70%, 58%, ${p.opacity})`);
+        gradient.addColorStop(1, `hsla(40, 70%, 58%, 0)`);
         ctx.fillStyle = gradient;
         ctx.fill();
       });
@@ -82,47 +82,41 @@ export default function LoginScreen({ onLogin, onAdmin }: LoginScreenProps) {
               style={{ borderColor: "hsl(var(--quest-gold) / 0.5)", boxShadow: "0 0 30px hsl(var(--quest-gold) / 0.2), 0 8px 32px hsl(0 0% 0% / 0.4)" }}
             />
           </div>
-          <h1 className="stencil text-4xl mb-2 gold-shimmer text-glow" style={{ letterSpacing: "0.18em" }}>QUEST BOOK RPM</h1>
-          <p className="font-oswald text-sm tracking-widest uppercase text-muted-foreground">Книга Армии RPM</p>
+          <h1 className="font-cinzel text-4xl font-black mb-2 gold-shimmer text-glow">Quest Book RPM</h1>
+          <p className="font-crimson text-lg italic text-muted-foreground">Книга Армии RPM</p>
 
-          <div className="chevron-divider mt-4 max-w-[220px] mx-auto">
-            <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
-              <path d="M1 9L7 1L13 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
+          <div className="diamond-divider mt-4 max-w-[220px] mx-auto">
+            <div className="diamond" />
           </div>
         </div>
 
-        <div className="parchment-bg riveted rounded p-6 camo-bg" style={{ borderColor: "hsl(var(--quest-gold) / 0.35)" }}>
-          <div className="chevron-divider mb-5">
-            <span className="font-oswald text-[10px] tracking-[0.3em] uppercase px-2">
-              {adminMode ? "★ ШТАБ ★" : "★ ПРОПУСК ★"}
-            </span>
-          </div>
+        <div className="parchment-bg paper-texture rounded-lg border p-6 corner-decor" style={{ borderColor: "hsl(var(--quest-gold) / 0.35)" }}>
+          <div className="ornament mb-5"><span>{adminMode ? "ХРАНИТЕЛЬ КНИГИ" : "ВХОД"}</span></div>
 
           {!adminMode ? (
             <>
-              <label className="block font-oswald text-xs tracking-widest uppercase text-muted-foreground mb-2">Позывной</label>
+              <label className="block font-oswald text-xs tracking-widest uppercase text-muted-foreground mb-2">Ваше имя</label>
               <input
                 type="text"
-                placeholder="БОЕЦ..."
+                placeholder="Странник..."
                 value={nick}
                 onChange={e => setNick(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter" && nick.trim()) onLogin(nick.trim()); }}
-                className="w-full bg-transparent border rounded-sm px-3 py-2.5 font-oswald text-base tracking-wider uppercase mb-5 outline-none transition-all duration-300"
+                className="w-full bg-transparent border rounded-md px-3 py-2.5 font-crimson text-base mb-5 outline-none transition-all duration-300"
                 style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))" }}
                 autoFocus
               />
               <button
                 disabled={!nick.trim()}
                 onClick={() => { if (nick.trim()) onLogin(nick.trim()); }}
-                className="btn-military-gold w-full py-3 rounded-sm stencil text-sm transition-all duration-200 disabled:opacity-40"
+                className="btn-book-gold w-full py-3 rounded-md font-cinzel text-sm font-bold tracking-widest uppercase transition-all duration-200 disabled:opacity-40"
               >
-                ★ Заступить на службу ★
+                Открыть книгу
               </button>
             </>
           ) : (
             <>
-              <label className="block font-oswald text-xs tracking-widest uppercase text-muted-foreground mb-2">Код доступа</label>
+              <label className="block font-oswald text-xs tracking-widest uppercase text-muted-foreground mb-2">Пароль</label>
               <input
                 type="password"
                 placeholder="••••••"
@@ -135,12 +129,12 @@ export default function LoginScreen({ onLogin, onAdmin }: LoginScreenProps) {
                     if (!success) { setAdminError(true); setAdminLoading(false); }
                   }
                 }}
-                className="w-full bg-transparent border rounded-sm px-3 py-2.5 font-oswald text-base tracking-wider outline-none transition-all duration-300"
+                className="w-full bg-transparent border rounded-md px-3 py-2.5 font-crimson text-base outline-none transition-all duration-300"
                 style={{ borderColor: adminError ? "hsl(0 70% 50%)" : "hsl(var(--border))", color: "hsl(var(--foreground))" }}
                 autoFocus
               />
               {adminError && (
-                <p className="font-oswald text-xs tracking-wider uppercase mt-1.5 mb-3 animate-fade-in" style={{ color: "hsl(0 70% 50%)" }}>⚠ Доступ запрещён</p>
+                <p className="font-crimson text-sm mt-1.5 mb-3 animate-fade-in" style={{ color: "hsl(0 70% 50%)" }}>Неверный пароль</p>
               )}
               {!adminError && <div className="mb-5" />}
               <button
@@ -151,23 +145,23 @@ export default function LoginScreen({ onLogin, onAdmin }: LoginScreenProps) {
                   const success = await onAdmin(adminKey);
                   if (!success) { setAdminError(true); setAdminLoading(false); }
                 }}
-                className="btn-military-gold w-full py-3 rounded-sm stencil text-sm transition-all duration-200 disabled:opacity-40"
+                className="btn-book-gold w-full py-3 rounded-md font-cinzel text-sm font-bold tracking-widest uppercase transition-all duration-200 disabled:opacity-40"
               >
-                {adminLoading ? "Проверка..." : "★ Вход в Штаб ★"}
+                {adminLoading ? "Проверка..." : "Войти как хранитель"}
               </button>
             </>
           )}
         </div>
 
         <button
-          className="w-full mt-3 py-2 font-oswald text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors duration-300"
+          className="w-full mt-3 py-2 font-oswald text-xs tracking-wider uppercase text-muted-foreground hover:text-foreground transition-colors duration-300"
           onClick={() => setAdminMode(m => !m)}
         >
-          {adminMode ? "◄ Назад в строй" : "[ Командование ]"}
+          {adminMode ? "← Вернуться" : "Вход для хранителя книги"}
         </button>
 
-        <p className="text-center mt-6 font-oswald text-[10px] tracking-[0.3em] uppercase text-muted-foreground/40">
-          ★ ВЕРНОСТЬ · ДОЛГ · ЧЕСТЬ ★
+        <p className="text-center mt-6 font-crimson text-xs text-muted-foreground/40 italic">
+          «Каждое великое путешествие начинается с первой страницы»
         </p>
       </div>
     </div>
