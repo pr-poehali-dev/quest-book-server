@@ -101,11 +101,10 @@ export default function AdminQuestsTab({
             </div>
           </div>
           <div className="flex gap-2 ml-auto">
-            <button className="px-3 py-1.5 rounded border font-oswald text-xs tracking-wider uppercase hover:bg-secondary"
+            <button className="px-3 py-1.5 rounded-md border font-oswald text-xs tracking-wider uppercase hover:bg-secondary transition-colors"
               style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}
               onClick={onCancelBranch}>Отмена</button>
-            <button className="px-3 py-1.5 rounded font-oswald text-xs tracking-wider uppercase"
-              style={{ background: "hsl(var(--quest-gold))", color: "hsl(var(--primary-foreground))" }}
+            <button className="btn-book-gold px-4 py-1.5 rounded-md font-oswald text-xs tracking-wider uppercase transition-all"
               onClick={() => onSaveBranch(editingBranch)}>Сохранить</button>
           </div>
         </div>
@@ -124,8 +123,7 @@ export default function AdminQuestsTab({
                   <p className="font-crimson text-xs italic text-muted-foreground">{currentBranch.description}</p>
                 </div>
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 rounded font-oswald text-sm tracking-wide"
-                style={{ background: "hsl(var(--quest-gold))", color: "hsl(var(--primary-foreground))" }}
+              <button className="btn-book-gold flex items-center gap-2 px-4 py-2 rounded-md font-cinzel text-sm font-semibold tracking-wide transition-all"
                 onClick={onAddQuest}>
                 <Icon name="Plus" size={15} color="hsl(var(--primary-foreground))" />
                 Добавить квест
@@ -146,7 +144,7 @@ export default function AdminQuestsTab({
                       onDragStart={e => handleDragStart(idx, e)}
                       onDragEnd={handleDragEnd}
                       onDragOver={e => handleDragOver(idx, e)}
-                      className={`parchment-bg rounded border p-3 flex items-start gap-3 group cursor-grab active:cursor-grabbing transition-all ${
+                      className={`parchment-bg paper-texture rounded-md border p-3 flex items-start gap-3 group cursor-grab active:cursor-grabbing transition-all hover:bg-secondary/20 ${
                         dragIdx !== null && overIdx === idx && dragIdx !== idx
                           ? "border-dashed scale-[1.02]"
                           : ""
@@ -174,7 +172,11 @@ export default function AdminQuestsTab({
 
                         </div>
                         <p className="text-xs font-crimson text-muted-foreground truncate">{q.description}</p>
-                        <p className="text-xs font-crimson text-muted-foreground truncate">🎁 {q.reward}</p>
+                        {q.reward && (
+                          <p className="text-xs font-crimson text-muted-foreground/80 truncate flex items-center gap-1 mt-0.5">
+                            <Icon name="Gift" size={11} color="hsl(var(--quest-gold) / 0.7)" />{q.reward}
+                          </p>
+                        )}
                       </div>
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 flex-shrink-0">
                         <button className="p-1.5 rounded hover:bg-secondary" onClick={() => onStartEditQuest(q)}>
@@ -191,14 +193,22 @@ export default function AdminQuestsTab({
               {quests.length === 0 && editingQuest?.id !== 0 && (
                 <div className="text-center py-12 text-muted-foreground">
                   <Icon name="ScrollText" size={40} color="hsl(var(--muted-foreground))" />
-                  <p className="font-crimson text-sm mt-3 italic">В этой ветке нет квестов</p>
+                  <p className="font-crimson text-sm mt-3 italic">В этой ветке пока нет квестов</p>
+                  <p className="font-crimson text-xs mt-1 text-muted-foreground/70">Нажмите «Добавить квест», чтобы создать первый</p>
                 </div>
               )}
             </div>
           </>
         ) : (
-          <div className="text-center py-20 text-muted-foreground">
-            <p className="font-crimson text-lg italic">Выберите ветку или создайте новую</p>
+          <div className="flex-1 flex items-center justify-center py-20">
+            <div className="text-center text-muted-foreground">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border"
+                style={{ background: "hsl(var(--quest-brown))", borderColor: "hsl(var(--quest-gold) / 0.2)" }}>
+                <Icon name="BookOpen" size={30} color="hsl(var(--quest-gold) / 0.6)" />
+              </div>
+              <p className="font-cinzel text-lg font-semibold" style={{ color: "hsl(var(--foreground))" }}>Выберите ветку</p>
+              <p className="font-crimson text-sm italic mt-1">Слева — список веток. Или создайте новую</p>
+            </div>
           </div>
         )}
       </div>

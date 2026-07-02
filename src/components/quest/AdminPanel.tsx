@@ -63,8 +63,8 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
   }, [adminKey]);
 
   useEffect(() => {
-    if (activeTab === "players") loadPlayers();
-  }, [activeTab, loadPlayers]);
+    loadPlayers();
+  }, [loadPlayers]);
 
   useEffect(() => {
     if (selectedPlayer) loadPlayerProgress(selectedPlayer);
@@ -197,17 +197,41 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
 
   const completedQuestIds = new Set(playerProgress.map(p => p.quest_id));
 
+  const totalBranches = branches.length;
+  const totalQuests = branches.reduce((s, b) => s + (b.quests?.length ?? 0), 0);
+  const totalPlayers = players.length;
+
   return (
     <div className="fixed inset-0 z-50 flex" style={{ background: "hsl(var(--background))" }}>
-      <div className="w-64 border-r flex flex-col" style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--card))" }}>
+      <div className="w-72 border-r flex flex-col" style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--card))" }}>
         <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: "hsl(var(--border))" }}>
-          <div>
-            <h2 className="font-cinzel text-sm font-bold" style={{ color: "hsl(var(--quest-gold))" }}>Админка</h2>
-            <p className="font-crimson text-xs text-muted-foreground">Управление квестами</p>
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-md flex items-center justify-center border flex-shrink-0"
+              style={{ background: "hsl(var(--quest-brown))", borderColor: "hsl(var(--quest-gold) / 0.35)" }}>
+              <Icon name="Settings" size={17} color="hsl(var(--quest-gold))" />
+            </div>
+            <div>
+              <h2 className="font-cinzel text-sm font-bold" style={{ color: "hsl(var(--quest-gold))" }}>Панель управления</h2>
+              <p className="font-crimson text-xs text-muted-foreground italic">Книга квестов RPM</p>
+            </div>
           </div>
-          <button className="p-1.5 rounded hover:bg-secondary" onClick={onClose}>
+          <button className="p-1.5 rounded-md hover:bg-secondary transition-colors" onClick={onClose} title="Закрыть">
             <Icon name="X" size={16} color="hsl(var(--muted-foreground))" />
           </button>
+        </div>
+
+        <div className="grid grid-cols-3 gap-px border-b" style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--border))" }}>
+          {[
+            { icon: "FolderTree", value: totalBranches, label: "веток" },
+            { icon: "ScrollText", value: totalQuests, label: "квестов" },
+            { icon: "Users", value: totalPlayers || "—", label: "игроков" },
+          ].map(stat => (
+            <div key={stat.label} className="flex flex-col items-center py-3 gap-0.5" style={{ background: "hsl(var(--card))" }}>
+              <Icon name={stat.icon} size={14} color="hsl(var(--quest-gold) / 0.7)" />
+              <span className="font-cinzel text-lg font-bold leading-none" style={{ color: "hsl(var(--foreground))" }}>{stat.value}</span>
+              <span className="font-oswald text-[9px] tracking-wider uppercase text-muted-foreground">{stat.label}</span>
+            </div>
+          ))}
         </div>
 
         {error && (
@@ -224,58 +248,74 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
 
         <div className="flex border-b" style={{ borderColor: "hsl(var(--border))" }}>
           <button
-            className="flex-1 py-2.5 font-oswald text-xs tracking-wider uppercase transition-colors"
-            style={{ color: activeTab === "quests" ? "hsl(var(--quest-gold))" : "hsl(var(--muted-foreground))", borderBottom: activeTab === "quests" ? "2px solid hsl(var(--quest-gold))" : "2px solid transparent" }}
+            className="flex-1 py-3 font-oswald text-xs tracking-widest uppercase transition-colors flex items-center justify-center gap-1.5"
+            style={{ color: activeTab === "quests" ? "hsl(var(--quest-gold))" : "hsl(var(--muted-foreground))", borderBottom: activeTab === "quests" ? "2px solid hsl(var(--quest-gold))" : "2px solid transparent", background: activeTab === "quests" ? "hsl(var(--quest-gold) / 0.05)" : "transparent" }}
             onClick={() => setActiveTab("quests")}>
-            <Icon name="ScrollText" size={13} />
-            <span className="ml-1">Квесты</span>
+            <Icon name="ScrollText" size={14} />
+            Квесты
           </button>
           <button
-            className="flex-1 py-2.5 font-oswald text-xs tracking-wider uppercase transition-colors"
-            style={{ color: activeTab === "players" ? "hsl(var(--quest-gold))" : "hsl(var(--muted-foreground))", borderBottom: activeTab === "players" ? "2px solid hsl(var(--quest-gold))" : "2px solid transparent" }}
+            className="flex-1 py-3 font-oswald text-xs tracking-widest uppercase transition-colors flex items-center justify-center gap-1.5"
+            style={{ color: activeTab === "players" ? "hsl(var(--quest-gold))" : "hsl(var(--muted-foreground))", borderBottom: activeTab === "players" ? "2px solid hsl(var(--quest-gold))" : "2px solid transparent", background: activeTab === "players" ? "hsl(var(--quest-gold) / 0.05)" : "transparent" }}
             onClick={() => setActiveTab("players")}>
-            <Icon name="Users" size={13} />
-            <span className="ml-1">Игроки</span>
+            <Icon name="Users" size={14} />
+            Игроки
           </button>
         </div>
 
         {activeTab === "quests" && (
           <div className="flex-1 overflow-y-auto p-3">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-oswald text-[10px] tracking-widest uppercase text-muted-foreground">Ветки</span>
-              <button className="p-1 rounded hover:bg-secondary" onClick={addBranch} disabled={loading}>
-                <Icon name="Plus" size={14} color="hsl(var(--quest-gold))" />
+              <span className="font-oswald text-[10px] tracking-widest uppercase text-muted-foreground">Ветки квестов</span>
+              <button className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-secondary transition-colors" onClick={addBranch} disabled={loading} title="Добавить ветку">
+                <Icon name="Plus" size={13} color="hsl(var(--quest-gold))" />
+                <span className="font-oswald text-[10px] tracking-wider uppercase" style={{ color: "hsl(var(--quest-gold))" }}>Ветка</span>
               </button>
             </div>
-            {branches.map((b, idx) => (
+            {branches.map((b, idx) => {
+              const bqTotal = (b.quests ?? []).length;
+              const isActive = activeBranch?.id === b.id;
+              return (
               <button key={b.id}
                 draggable
                 onDragStart={e => brDragStart(idx, e)}
                 onDragEnd={brDragEnd}
                 onDragOver={e => brDragOver(idx, e)}
-                className={`w-full text-left px-3 py-2.5 rounded mb-1 flex items-center gap-2 transition-colors group cursor-grab active:cursor-grabbing ${activeBranch?.id === b.id ? "bg-secondary" : "hover:bg-secondary/50"}`}
+                className={`w-full text-left px-2.5 py-2.5 rounded-md mb-1 flex items-center gap-2 transition-all group cursor-grab active:cursor-grabbing ${isActive ? "bg-secondary" : "hover:bg-secondary/50"}`}
                 style={{
                   borderWidth: 1,
                   borderStyle: "solid",
                   borderColor: brDragIdx !== null && brOverIdx === idx && brDragIdx !== idx
                     ? "hsl(var(--quest-gold))"
-                    : "transparent",
+                    : isActive ? `${b.color}55` : "transparent",
+                  boxShadow: isActive ? `inset 2px 0 0 ${b.color}` : "none",
                 }}
                 onClick={() => { setActiveBranch(b); setEditingBranch(null); setEditingQuest(null); }}>
-                <Icon name="GripVertical" size={13} color="hsl(var(--muted-foreground))" />
-                <Icon name={b.icon} size={15} color={b.color} fallback="Star" />
-                <span className="font-crimson text-sm truncate flex-1">{b.title}</span>
-                <span className="font-oswald text-[10px] text-muted-foreground">{(b.quests ?? []).length}</span>
-                <div className="flex gap-0.5">
-                  <button className="p-1 rounded hover:bg-background" onClick={e => { e.stopPropagation(); startEditBranch(b); }}>
-                    <Icon name="Pencil" size={13} color="hsl(var(--muted-foreground))" />
+                <Icon name="GripVertical" size={13} color="hsl(var(--muted-foreground) / 0.5)" className="flex-shrink-0" />
+                <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0" style={{ background: `${b.color}22`, border: `1px solid ${b.color}44` }}>
+                  <Icon name={b.icon} size={14} color={b.color} fallback="Star" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="font-cinzel text-sm font-semibold truncate block leading-tight">{b.title}</span>
+                  <span className="font-oswald text-[9px] tracking-wider uppercase text-muted-foreground">{bqTotal} {bqTotal === 1 ? "квест" : bqTotal < 5 ? "квеста" : "квестов"}</span>
+                </div>
+                <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                  <button className="p-1 rounded hover:bg-background" onClick={e => { e.stopPropagation(); startEditBranch(b); }} title="Редактировать">
+                    <Icon name="Pencil" size={12} color="hsl(var(--muted-foreground))" />
                   </button>
-                  <button className="p-1 rounded hover:bg-background" onClick={e => { e.stopPropagation(); removeBranch(b); }}>
-                    <Icon name="Trash2" size={13} color="hsl(var(--destructive))" />
+                  <button className="p-1 rounded hover:bg-background" onClick={e => { e.stopPropagation(); removeBranch(b); }} title="Удалить">
+                    <Icon name="Trash2" size={12} color="hsl(var(--destructive))" />
                   </button>
                 </div>
               </button>
-            ))}
+              );
+            })}
+            {branches.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <Icon name="FolderPlus" size={28} color="hsl(var(--muted-foreground))" />
+                <p className="font-crimson text-xs mt-2 italic">Создайте первую ветку</p>
+              </div>
+            )}
           </div>
         )}
 
@@ -284,13 +324,13 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
             <div className="mb-3">
               <div className="relative">
                 <input
-                  className="w-full bg-background border rounded px-2 py-1.5 pl-7 font-crimson text-sm outline-none"
+                  className="w-full bg-background border rounded-md px-2 py-2 pl-8 font-crimson text-sm outline-none"
                   style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))" }}
                   placeholder="Поиск игрока..."
                   value={playerSearch}
                   onChange={e => setPlayerSearch(e.target.value)}
                 />
-                <div className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
                   <Icon name="Search" size={13} color="hsl(var(--muted-foreground))" />
                 </div>
               </div>
@@ -298,22 +338,35 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
             {playersLoading ? (
               <p className="font-crimson text-xs text-muted-foreground text-center py-4 italic animate-pulse">Загрузка...</p>
             ) : filteredPlayers.length === 0 ? (
-              <p className="font-crimson text-xs text-muted-foreground text-center py-4 italic">Игроки не найдены</p>
+              <div className="text-center py-8 text-muted-foreground">
+                <Icon name="UserX" size={28} color="hsl(var(--muted-foreground))" />
+                <p className="font-crimson text-xs mt-2 italic">{playerSearch ? "Игроки не найдены" : "Пока нет игроков"}</p>
+              </div>
             ) : (
-              filteredPlayers.map(p => (
+              filteredPlayers.map(p => {
+                const pct = totalQuests > 0 ? Math.round((p.completed / totalQuests) * 100) : 0;
+                const isSel = selectedPlayer === p.nick;
+                return (
                 <button key={p.nick}
-                  className={`w-full text-left px-3 py-2.5 rounded mb-1 flex items-center gap-2 transition-colors ${selectedPlayer === p.nick ? "bg-secondary" : "hover:bg-secondary/50"}`}
+                  className={`w-full text-left px-2.5 py-2.5 rounded-md mb-1 flex items-center gap-2.5 transition-all ${isSel ? "bg-secondary" : "hover:bg-secondary/50"}`}
+                  style={{ boxShadow: isSel ? "inset 2px 0 0 hsl(var(--quest-gold))" : "none" }}
                   onClick={() => setSelectedPlayer(p.nick)}>
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center font-cinzel text-[10px] font-bold flex-shrink-0"
-                    style={{ background: "hsl(var(--quest-gold))", color: "hsl(var(--primary-foreground))" }}>
+                  <div className="wax-seal w-8 h-8 rounded-full flex items-center justify-center font-cinzel text-xs font-bold flex-shrink-0"
+                    style={{ color: "hsl(var(--primary-foreground))" }}>
                     {p.nick[0].toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="font-crimson text-sm truncate block">{p.nick}</span>
-                    <span className="font-oswald text-[10px] text-muted-foreground">{p.completed} выполнено</span>
+                    <span className="font-cinzel text-sm font-semibold truncate block leading-tight">{p.nick}</span>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "hsl(var(--muted))" }}>
+                        <div className="h-full rounded-full progress-bar-fill" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="font-oswald text-[9px] text-muted-foreground flex-shrink-0">{p.completed}/{totalQuests}</span>
+                    </div>
                   </div>
                 </button>
-              ))
+                );
+              })
             )}
           </div>
         )}
@@ -344,19 +397,25 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
         <div className="flex-1 flex flex-col overflow-hidden">
           {selectedPlayer ? (
             <div className="flex-1 overflow-y-auto p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <button className="p-1.5 rounded hover:bg-secondary" onClick={() => setSelectedPlayer(null)}>
+              <div className="parchment-bg paper-texture rounded-lg border p-4 mb-6 flex items-center gap-4" style={{ borderColor: "hsl(var(--quest-gold) / 0.3)" }}>
+                <button className="p-1.5 rounded-md hover:bg-secondary transition-colors flex-shrink-0" onClick={() => setSelectedPlayer(null)} title="Назад к списку">
                   <Icon name="ArrowLeft" size={16} color="hsl(var(--muted-foreground))" />
                 </button>
-                <div className="w-10 h-10 rounded-full flex items-center justify-center font-cinzel text-sm font-bold"
-                  style={{ background: "hsl(var(--quest-gold))", color: "hsl(var(--primary-foreground))" }}>
+                <div className="wax-seal w-12 h-12 rounded-full flex items-center justify-center font-cinzel text-lg font-bold flex-shrink-0"
+                  style={{ color: "hsl(var(--primary-foreground))" }}>
                   {selectedPlayer[0].toUpperCase()}
                 </div>
-                <div>
-                  <h3 className="font-cinzel text-lg font-bold">{selectedPlayer}</h3>
-                  <p className="font-oswald text-xs text-muted-foreground tracking-wider">
-                    {playerProgress.length} {playerProgress.length === 1 ? "квест выполнен" : "квестов выполнено"}
-                  </p>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-cinzel text-xl font-bold truncate">{selectedPlayer}</h3>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <div className="flex-1 max-w-xs h-1.5 rounded-full overflow-hidden" style={{ background: "hsl(var(--muted))" }}>
+                      <div className="h-full rounded-full progress-bar-fill transition-all duration-700"
+                        style={{ width: `${totalQuests > 0 ? Math.round((playerProgress.length / totalQuests) * 100) : 0}%` }} />
+                    </div>
+                    <span className="font-oswald text-xs text-muted-foreground tracking-wider whitespace-nowrap">
+                      {playerProgress.length}/{totalQuests} квестов
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -364,33 +423,40 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
                 <p className="font-crimson text-sm text-muted-foreground text-center py-8 italic animate-pulse">Загрузка прогресса...</p>
               ) : (
                 <div className="space-y-6 max-w-2xl">
-                  {branches.map(branch => (
+                  {branches.map(branch => {
+                    const bq = branch.quests ?? [];
+                    const bDone = bq.filter(q => completedQuestIds.has(q.id)).length;
+                    const bAllDone = bq.length > 0 && bDone === bq.length;
+                    return (
                     <div key={branch.id}>
                       <div className="flex items-center gap-2 mb-3">
-                        <div className="w-7 h-7 rounded flex items-center justify-center" style={{ background: `${branch.color}22` }}>
+                        <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0" style={{ background: `${branch.color}22`, border: `1px solid ${branch.color}44` }}>
                           <Icon name={branch.icon} size={16} color={branch.color} fallback="Star" />
                         </div>
                         <h4 className="font-cinzel text-sm font-bold">{branch.title}</h4>
-                        <span className="font-oswald text-[10px] text-muted-foreground ml-auto">
-                          {(branch.quests ?? []).filter(q => completedQuestIds.has(q.id)).length}/{(branch.quests ?? []).length}
+                        {bAllDone && (
+                          <Icon name="BadgeCheck" size={14} color="hsl(var(--quest-green-bright))" />
+                        )}
+                        <span className="font-oswald text-[10px] tracking-wider text-muted-foreground ml-auto">
+                          {bDone}/{bq.length}
                         </span>
                       </div>
                       <div className="grid gap-2">
-                        {(branch.quests ?? []).map(quest => {
+                        {bq.map(quest => {
                           const isCompleted = completedQuestIds.has(quest.id);
                           return (
                             <div key={quest.id}
-                              className="parchment-bg rounded border p-3 flex items-center gap-3 cursor-pointer hover:bg-secondary/30 transition-colors"
+                              className="parchment-bg rounded-md border p-3 flex items-center gap-3 cursor-pointer hover:bg-secondary/30 transition-all group"
                               style={{ borderColor: isCompleted ? "hsl(var(--quest-green) / 0.4)" : "hsl(var(--border))" }}
                               onClick={() => toggleQuestProgress(selectedPlayer, quest.id, isCompleted)}>
-                              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${isCompleted ? "" : ""}`}
+                              <div className="w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors"
                                 style={{
                                   borderColor: isCompleted ? "hsl(var(--quest-green))" : "hsl(var(--border))",
                                   background: isCompleted ? "hsl(var(--quest-green))" : "transparent",
                                 }}>
                                 {isCompleted && <Icon name="Check" size={12} color="white" />}
                               </div>
-                              <div className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0"
+                              <div className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0"
                                 style={{ background: isCompleted ? "hsl(var(--quest-green) / 0.15)" : "hsl(var(--muted))" }}>
                                 <Icon name={quest.icon} size={16} fallback="Star"
                                   color={isCompleted ? "hsl(var(--quest-green-bright))" : "hsl(var(--quest-gold))"} />
@@ -399,29 +465,41 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
                                 <span className={`font-cinzel text-sm font-semibold truncate block ${isCompleted ? "text-muted-foreground line-through" : ""}`}>
                                   {quest.title}
                                 </span>
-                                <span className="font-oswald text-[10px] text-muted-foreground">{quest.rarity}</span>
+                                <span className="font-oswald text-[10px] tracking-widest uppercase px-1.5 py-0.5 rounded inline-block mt-0.5"
+                                  style={{ background: "hsl(var(--muted) / 0.5)", color: "hsl(var(--muted-foreground))" }}>
+                                  {quest.rarity === "common" ? "Обычный" : quest.rarity === "rare" ? "Редкий" : "Легендарный"}
+                                </span>
                               </div>
-                              <span className="font-oswald text-[10px] tracking-wider flex-shrink-0"
-                                style={{ color: isCompleted ? "hsl(var(--quest-green-bright))" : "hsl(var(--muted-foreground))" }}>
-                                {isCompleted ? "DONE" : "—"}
+                              <span className="font-oswald text-[9px] tracking-widest uppercase px-2 py-1 rounded-md flex-shrink-0 border transition-colors"
+                                style={{
+                                  color: isCompleted ? "hsl(var(--quest-green-bright))" : "hsl(var(--muted-foreground))",
+                                  borderColor: isCompleted ? "hsl(var(--quest-green) / 0.4)" : "hsl(var(--border))",
+                                  background: isCompleted ? "hsl(var(--quest-green) / 0.1)" : "transparent",
+                                }}>
+                                {isCompleted ? "Выдан" : "Выдать"}
                               </span>
                             </div>
                           );
                         })}
-                        {(branch.quests ?? []).length === 0 && (
+                        {bq.length === 0 && (
                           <p className="font-crimson text-xs text-muted-foreground italic pl-9">Нет квестов</p>
                         )}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center text-muted-foreground">
-                <Icon name="Users" size={40} color="hsl(var(--muted-foreground))" />
-                <p className="font-crimson text-lg italic mt-3">Выберите игрока из списка</p>
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border"
+                  style={{ background: "hsl(var(--quest-brown))", borderColor: "hsl(var(--quest-gold) / 0.2)" }}>
+                  <Icon name="UserSearch" size={30} color="hsl(var(--quest-gold) / 0.6)" />
+                </div>
+                <p className="font-cinzel text-lg font-semibold" style={{ color: "hsl(var(--foreground))" }}>Выберите игрока</p>
+                <p className="font-crimson text-sm italic mt-1">Слева — список игроков и их прогресс</p>
               </div>
             </div>
           )}

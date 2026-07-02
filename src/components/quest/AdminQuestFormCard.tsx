@@ -72,10 +72,9 @@ export default function AdminQuestFormCard({ form, setForm, onSave, onCancel, is
         </div>
       </div>
       <div className="flex gap-2 justify-end">
-        <button className="px-3 py-1.5 rounded border font-oswald text-xs tracking-wider uppercase hover:bg-secondary"
+        <button className="px-3 py-1.5 rounded-md border font-oswald text-xs tracking-wider uppercase hover:bg-secondary transition-colors"
           style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }} onClick={onCancel}>Отмена</button>
-        <button className="px-4 py-1.5 rounded font-oswald text-xs tracking-wider uppercase"
-          style={{ background: "hsl(var(--quest-gold))", color: "hsl(var(--primary-foreground))" }} onClick={onSave}>Сохранить</button>
+        <button className="btn-book-gold px-4 py-1.5 rounded-md font-oswald text-xs tracking-wider uppercase transition-all" onClick={onSave}>Сохранить</button>
       </div>
     </div>
   );
