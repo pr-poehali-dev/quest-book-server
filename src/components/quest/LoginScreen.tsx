@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import Icon from "@/components/ui/icon";
 
 
 interface LoginScreenProps {
@@ -42,8 +43,8 @@ const FloatingParticles = () => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 2);
-        gradient.addColorStop(0, `hsla(40, 70%, 58%, ${p.opacity})`);
-        gradient.addColorStop(1, `hsla(40, 70%, 58%, 0)`);
+        gradient.addColorStop(0, `hsla(42, 65%, 55%, ${p.opacity})`);
+        gradient.addColorStop(1, `hsla(42, 65%, 55%, 0)`);
         ctx.fillStyle = gradient;
         ctx.fill();
       });
@@ -73,50 +74,48 @@ export default function LoginScreen({ onLogin, onAdmin }: LoginScreenProps) {
       <div className="w-full max-w-sm animate-scale-in relative z-10">
         <div className="text-center mb-8">
           <div className="relative inline-block mb-4">
-            <div className="absolute -inset-3 rounded-2xl animate-breathe"
-              style={{ background: "radial-gradient(circle, hsl(var(--quest-gold) / 0.15) 0%, transparent 70%)" }} />
-            <img
-              src="https://cdn.poehali.dev/projects/d5e86919-d370-406c-a721-817de003fa32/files/2aaf2152-2c19-4345-9b41-e69234d4b1e1.jpg"
-              alt="Quest Book RPM"
-              className="relative w-28 h-28 object-cover rounded-lg border-2"
-              style={{ borderColor: "hsl(var(--quest-gold) / 0.5)", boxShadow: "0 0 30px hsl(var(--quest-gold) / 0.2), 0 8px 32px hsl(0 0% 0% / 0.4)" }}
-            />
+            <div className="absolute -inset-3 rounded-full animate-breathe"
+              style={{ background: "radial-gradient(circle, hsl(var(--quest-gold) / 0.18) 0%, transparent 70%)" }} />
+            <div className="gov-seal relative w-28 h-28 flex items-center justify-center">
+              <Icon name="Landmark" size={44} color="hsl(var(--quest-gold))" />
+            </div>
           </div>
-          <h1 className="font-cinzel text-4xl font-black mb-2 gold-shimmer text-glow">Quest Book RPM</h1>
-          <p className="font-crimson text-lg italic text-muted-foreground">Книга квестов RPM</p>
+          <p className="font-oswald text-[11px] tracking-[0.35em] uppercase text-quest-gold/70 mb-1" style={{ color: "hsl(var(--quest-gold) / 0.7)" }}>Правительство RPM</p>
+          <h1 className="font-cinzel text-4xl font-black mb-2 gold-shimmer text-glow">Реестр поручений</h1>
+          <p className="font-crimson text-lg italic text-muted-foreground">Официальная книга квестов RPM</p>
 
           <div className="diamond-divider mt-4 max-w-[220px] mx-auto">
             <div className="diamond" />
           </div>
         </div>
 
-        <div className="parchment-bg paper-texture rounded-lg border p-6 corner-decor" style={{ borderColor: "hsl(var(--quest-gold) / 0.35)" }}>
-          <div className="ornament mb-5"><span>{adminMode ? "ХРАНИТЕЛЬ КНИГИ" : "ВХОД"}</span></div>
+        <div className="parchment-bg paper-texture rounded border p-6 corner-decor" style={{ borderColor: "hsl(var(--quest-gold) / 0.35)" }}>
+          <div className="ornament mb-5"><span>{adminMode ? "ВЕДОМСТВО" : "ПРОПУСК"}</span></div>
 
           {!adminMode ? (
             <>
-              <label className="block font-oswald text-xs tracking-widest uppercase text-muted-foreground mb-2">Ваше имя</label>
+              <label className="block font-oswald text-xs tracking-widest uppercase text-muted-foreground mb-2">Имя гражданина</label>
               <input
                 type="text"
-                placeholder="Странник..."
+                placeholder="Введите имя..."
                 value={nick}
                 onChange={e => setNick(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter" && nick.trim()) onLogin(nick.trim()); }}
-                className="w-full bg-transparent border rounded-md px-3 py-2.5 font-crimson text-base mb-5 outline-none transition-all duration-300"
+                className="w-full bg-transparent border rounded-sm px-3 py-2.5 font-crimson text-base mb-5 outline-none transition-all duration-300"
                 style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))" }}
                 autoFocus
               />
               <button
                 disabled={!nick.trim()}
                 onClick={() => { if (nick.trim()) onLogin(nick.trim()); }}
-                className="btn-book-gold w-full py-3 rounded-md font-cinzel text-sm font-bold tracking-widest uppercase transition-all duration-200 disabled:opacity-40"
+                className="btn-book-gold w-full py-3 rounded-sm font-cinzel text-sm font-bold tracking-widest uppercase transition-all duration-200 disabled:opacity-40"
               >
-                Открыть книгу
+                Получить допуск
               </button>
             </>
           ) : (
             <>
-              <label className="block font-oswald text-xs tracking-widest uppercase text-muted-foreground mb-2">Пароль</label>
+              <label className="block font-oswald text-xs tracking-widest uppercase text-muted-foreground mb-2">Служебный код</label>
               <input
                 type="password"
                 placeholder="••••••"
@@ -129,12 +128,12 @@ export default function LoginScreen({ onLogin, onAdmin }: LoginScreenProps) {
                     if (!success) { setAdminError(true); setAdminLoading(false); }
                   }
                 }}
-                className="w-full bg-transparent border rounded-md px-3 py-2.5 font-crimson text-base outline-none transition-all duration-300"
+                className="w-full bg-transparent border rounded-sm px-3 py-2.5 font-crimson text-base outline-none transition-all duration-300"
                 style={{ borderColor: adminError ? "hsl(0 70% 50%)" : "hsl(var(--border))", color: "hsl(var(--foreground))" }}
                 autoFocus
               />
               {adminError && (
-                <p className="font-crimson text-sm mt-1.5 mb-3 animate-fade-in" style={{ color: "hsl(0 70% 50%)" }}>Неверный пароль</p>
+                <p className="font-crimson text-sm mt-1.5 mb-3 animate-fade-in" style={{ color: "hsl(0 70% 50%)" }}>Доступ отклонён</p>
               )}
               {!adminError && <div className="mb-5" />}
               <button
@@ -145,9 +144,9 @@ export default function LoginScreen({ onLogin, onAdmin }: LoginScreenProps) {
                   const success = await onAdmin(adminKey);
                   if (!success) { setAdminError(true); setAdminLoading(false); }
                 }}
-                className="btn-book-gold w-full py-3 rounded-md font-cinzel text-sm font-bold tracking-widest uppercase transition-all duration-200 disabled:opacity-40"
+                className="btn-book-gold w-full py-3 rounded-sm font-cinzel text-sm font-bold tracking-widest uppercase transition-all duration-200 disabled:opacity-40"
               >
-                {adminLoading ? "Проверка..." : "Войти как хранитель"}
+                {adminLoading ? "Проверка..." : "Войти в ведомство"}
               </button>
             </>
           )}
@@ -157,11 +156,11 @@ export default function LoginScreen({ onLogin, onAdmin }: LoginScreenProps) {
           className="w-full mt-3 py-2 font-oswald text-xs tracking-wider uppercase text-muted-foreground hover:text-foreground transition-colors duration-300"
           onClick={() => setAdminMode(m => !m)}
         >
-          {adminMode ? "← Вернуться" : "Вход для хранителя книги"}
+          {adminMode ? "← Вернуться" : "Служебный вход"}
         </button>
 
         <p className="text-center mt-6 font-crimson text-xs text-muted-foreground/40 italic">
-          «Каждое великое путешествие начинается с первой страницы»
+          «Порядок и долг — основа процветания»
         </p>
       </div>
     </div>

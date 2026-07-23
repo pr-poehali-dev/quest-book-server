@@ -16,10 +16,10 @@ const FloatingEmbers = () => (
 );
 
 const RarityBadge = ({ rarity }: { rarity: Rarity }) => {
-  const labels = { common: "Обычный", rare: "Редкий", epic: "Легендарный" };
-  const icons = { common: "Circle", rare: "Gem", epic: "Crown" };
+  const labels = { common: "Стандартное", rare: "Важное", epic: "Особой важности" };
+  const icons = { common: "FileText", rare: "Stamp", epic: "ShieldCheck" };
   return (
-    <span className={`inline-flex items-center gap-1 text-[10px] font-oswald tracking-widest uppercase px-2 py-0.5 rounded border badge-${rarity}`}>
+    <span className={`inline-flex items-center gap-1 text-[10px] font-oswald tracking-widest uppercase px-2 py-0.5 rounded-sm border badge-${rarity}`}>
       <Icon name={icons[rarity]} size={9} />
       {labels[rarity]}
     </span>
@@ -125,7 +125,7 @@ const QuestCard = ({ quest, onClick, index }: { quest: Quest; onClick: (q: Quest
 };
 
 const QuestModal = ({ quest, onClose }: { quest: Quest; onClose: () => void }) => {
-  const rarityColors = { common: "var(--quest-gold)", rare: "210 75% 68%", epic: "275 65% 72%" };
+  const rarityColors = { common: "var(--quest-steel)", rare: "42 65% 55%", epic: "352 62% 52%" };
   const glowColor = rarityColors[quest.rarity];
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modal-backdrop" onClick={onClose}>
@@ -156,31 +156,31 @@ const QuestModal = ({ quest, onClose }: { quest: Quest; onClose: () => void }) =
           <RarityBadge rarity={quest.rarity} />
         </div>
 
-        <div className="ornament mb-4"><span>ГЛАВА</span></div>
+        <div className="ornament mb-4"><span>ПОРУЧЕНИЕ</span></div>
 
         <p className="font-crimson text-base text-center mb-5 leading-relaxed">{quest.description}</p>
 
-        <div className="parchment-bg rounded-md p-3 mb-4 border relative overflow-hidden" style={{ borderColor: "hsl(var(--quest-gold) / 0.25)" }}>
+        <div className="parchment-bg rounded-sm p-3 mb-4 border relative overflow-hidden" style={{ borderColor: "hsl(var(--quest-gold) / 0.25)" }}>
           <div className="flex items-center gap-2 mb-1">
-            <Icon name="Gift" size={14} color="hsl(var(--quest-gold))" />
-            <span className="font-oswald text-xs tracking-widest uppercase text-muted-foreground">Награда</span>
+            <Icon name="Award" size={14} color="hsl(var(--quest-gold))" />
+            <span className="font-oswald text-xs tracking-widest uppercase text-muted-foreground">Вознаграждение</span>
           </div>
           <p className="font-crimson text-sm">{quest.reward}</p>
         </div>
 
         {quest.status === "completed" && (
-          <div className="rounded-md p-3 mb-4 text-center border animate-fade-in" style={{ borderColor: "hsl(var(--quest-green) / 0.5)", background: "hsl(var(--quest-green) / 0.12)" }}>
+          <div className="rounded-sm p-3 mb-4 text-center border animate-fade-in" style={{ borderColor: "hsl(var(--quest-green) / 0.5)", background: "hsl(var(--quest-green) / 0.12)" }}>
             <p className="font-cinzel text-sm font-semibold flex items-center justify-center gap-2" style={{ color: "hsl(var(--quest-green-bright))" }}>
-              <Icon name="CheckCircle" size={16} color="hsl(var(--quest-green-bright))" />
-              Глава завершена
+              <Icon name="BadgeCheck" size={16} color="hsl(var(--quest-green-bright))" />
+              Исполнено и заверено
             </p>
           </div>
         )}
 
         {quest.status === "active" && (
-          <div className="rounded-md p-3 mb-4 text-center border animate-fade-in" style={{ borderColor: "hsl(var(--quest-gold) / 0.4)", background: "hsl(var(--quest-gold) / 0.1)" }}>
+          <div className="rounded-sm p-3 mb-4 text-center border animate-fade-in" style={{ borderColor: "hsl(var(--quest-gold) / 0.4)", background: "hsl(var(--quest-gold) / 0.1)" }}>
             <p className="font-crimson text-sm" style={{ color: "hsl(var(--quest-gold))" }}>
-              Ожидайте — хранитель книги откроет эту главу, когда вы её пройдёте
+              Ожидайте — ведомство заверит исполнение поручения
             </p>
           </div>
         )}
@@ -188,8 +188,8 @@ const QuestModal = ({ quest, onClose }: { quest: Quest; onClose: () => void }) =
         <div className="diamond-divider mb-4"><div className="diamond" /></div>
 
         <div className="flex">
-          <button className="btn-book flex-1 py-2.5 rounded-md font-cinzel text-sm font-semibold tracking-wider transition-all duration-200" onClick={onClose}>
-            Закрыть книгу
+          <button className="btn-book flex-1 py-2.5 rounded-sm font-cinzel text-sm font-semibold tracking-wider transition-all duration-200" onClick={onClose}>
+            Закрыть предписание
           </button>
         </div>
       </div>
@@ -198,7 +198,7 @@ const QuestModal = ({ quest, onClose }: { quest: Quest; onClose: () => void }) =
 };
 
 const BranchQuestCount = ({ total }: { total: number }) => {
-  const label = total === 1 ? "глава" : total < 5 ? "главы" : "глав";
+  const label = total === 1 ? "поручение" : total < 5 ? "поручения" : "поручений";
   return (
     <span className="font-crimson text-xs italic text-muted-foreground/70">
       {total} {label}
@@ -249,13 +249,13 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
         style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--background) / 0.95)", backdropFilter: "blur(12px)" }}>
         <div className="container mx-auto px-4 py-3 flex items-center justify-between relative z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-md flex items-center justify-center relative border"
-              style={{ background: "hsl(var(--quest-brown))", borderColor: "hsl(var(--quest-gold) / 0.35)", boxShadow: "0 0 12px hsl(var(--quest-gold) / 0.1)" }}>
-              <Icon name="BookMarked" size={19} color="hsl(var(--quest-gold))" />
+            <div className="w-10 h-10 rounded-sm flex items-center justify-center relative border"
+              style={{ background: "hsl(var(--quest-navy))", borderColor: "hsl(var(--quest-gold) / 0.35)", boxShadow: "0 0 12px hsl(var(--quest-gold) / 0.1)" }}>
+              <Icon name="Landmark" size={19} color="hsl(var(--quest-gold))" />
             </div>
             <div>
-              <h1 className="font-cinzel text-lg font-bold leading-none gold-shimmer">Quest Book RPM</h1>
-              <p className="font-crimson text-xs italic text-muted-foreground">Книга квестов RPM</p>
+              <h1 className="font-cinzel text-lg font-bold leading-none gold-shimmer">Реестр поручений</h1>
+              <p className="font-crimson text-xs italic text-muted-foreground">Официальная книга квестов RPM</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -351,7 +351,7 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
             </div>
 
             <div className="flourish-divider mb-5">
-              <Icon name="Sparkles" size={14} color="hsl(var(--quest-gold) / 0.6)" />
+              <Icon name="Stamp" size={14} color="hsl(var(--quest-gold) / 0.6)" />
             </div>
 
             <div className="space-y-0">
@@ -366,15 +366,15 @@ export default function QuestBook({ player, branches, completedIds, onLogout }: 
             {branchQuestsWithStatus.length > 0 && (
               <div className="mt-6 flex items-center justify-center gap-3 opacity-40">
                 <div className="h-px w-16" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--quest-gold) / 0.5))" }} />
-                <Icon name="Feather" size={13} color="hsl(var(--quest-gold))" className="star-glow" />
+                <Icon name="Stamp" size={13} color="hsl(var(--quest-gold))" className="star-glow" />
                 <div className="h-px w-16" style={{ background: "linear-gradient(90deg, hsl(var(--quest-gold) / 0.5), transparent)" }} />
               </div>
             )}
 
             {branchQuestsWithStatus.length === 0 && (
-              <div className="text-center py-12 parchment-bg paper-texture rounded-lg border" style={{ borderColor: "hsl(var(--border))" }}>
-                <Icon name="BookOpen" size={32} color="hsl(var(--muted-foreground))" />
-                <p className="font-crimson text-sm text-muted-foreground mt-3 italic">В этой главе ещё не написано ни строчки</p>
+              <div className="text-center py-12 parchment-bg paper-texture rounded border" style={{ borderColor: "hsl(var(--border))" }}>
+                <Icon name="FileX" size={32} color="hsl(var(--muted-foreground))" />
+                <p className="font-crimson text-sm text-muted-foreground mt-3 italic">В этом разделе пока нет поручений</p>
               </div>
             )}
           </>

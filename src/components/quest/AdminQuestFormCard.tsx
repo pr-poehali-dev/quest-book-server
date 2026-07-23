@@ -4,9 +4,9 @@ import { Quest, Rarity } from "./types";
 const ICONS_LIST = ["Star", "Sword", "Shield", "Target", "Swords", "Moon", "MapPin", "Map", "Anchor", "Globe", "Compass", "Wrench", "FlaskConical", "Sparkles", "Crown", "Trophy", "UserPlus", "ShoppingBag", "Flag", "Hammer", "Zap", "Flame", "Heart", "Gift"];
 
 export const RarityBadge = ({ rarity }: { rarity: Rarity }) => {
-  const labels = { common: "Обычный", rare: "Редкий", epic: "Легендарный" };
+  const labels = { common: "Стандартное", rare: "Важное", epic: "Особой важности" };
   return (
-    <span className={`text-[10px] font-oswald tracking-widest uppercase px-2 py-0.5 rounded border badge-${rarity}`}>
+    <span className={`text-[10px] font-oswald tracking-widest uppercase px-2 py-0.5 rounded-sm border badge-${rarity}`}>
       {labels[rarity]}
     </span>
   );
@@ -26,14 +26,14 @@ export default function AdminQuestFormCard({ form, setForm, onSave, onCancel, is
 
   return (
     <div className="parchment-bg rounded border p-4 animate-fade-in" style={{ borderColor: "hsl(var(--quest-gold) / 0.4)" }}>
-      <p className="font-cinzel text-xs mb-3" style={{ color: "hsl(var(--quest-gold))" }}>{isNew ? "Новый квест" : "Редактирование"}</p>
+      <p className="font-cinzel text-xs mb-3" style={{ color: "hsl(var(--quest-gold))" }}>{isNew ? "Новое поручение" : "Редактирование поручения"}</p>
       <div className="grid grid-cols-2 gap-3 mb-3">
         <div>
           <label className="block font-oswald text-[10px] tracking-wider uppercase text-muted-foreground mb-1">Название</label>
           <input className={inp} style={st} value={form.title ?? ""} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} />
         </div>
         <div>
-          <label className="block font-oswald text-[10px] tracking-wider uppercase text-muted-foreground mb-1">Награда</label>
+          <label className="block font-oswald text-[10px] tracking-wider uppercase text-muted-foreground mb-1">Вознаграждение</label>
           <input className={inp} style={st} value={form.reward ?? ""} onChange={e => setForm(p => ({ ...p, reward: e.target.value }))} />
         </div>
         <div className="col-span-2">
@@ -41,11 +41,11 @@ export default function AdminQuestFormCard({ form, setForm, onSave, onCancel, is
           <input className={inp} style={st} value={form.description ?? ""} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
         </div>
         <div>
-          <label className="block font-oswald text-[10px] tracking-wider uppercase text-muted-foreground mb-1">Редкость</label>
+          <label className="block font-oswald text-[10px] tracking-wider uppercase text-muted-foreground mb-1">Степень важности</label>
           <select className={inp} style={st} value={form.rarity ?? "common"} onChange={e => setForm(p => ({ ...p, rarity: e.target.value as Rarity }))}>
-            <option value="common">Обычный</option>
-            <option value="rare">Редкий</option>
-            <option value="epic">Легендарный</option>
+            <option value="common">Стандартное</option>
+            <option value="rare">Важное</option>
+            <option value="epic">Особой важности</option>
           </select>
         </div>
         <div className="col-span-2">

@@ -99,9 +99,9 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
   };
 
   const addBranch = () => withLoad(async () => {
-    const res = await apiFetch("/branches", { method: "POST", body: JSON.stringify({ title: "Новая ветка", icon: "Star", color: "#c0a830", description: "" }) }, adminKey);
+    const res = await apiFetch("/branches", { method: "POST", body: JSON.stringify({ title: "Новый раздел", icon: "Landmark", color: "#c0a830", description: "" }) }, adminKey);
     if (res.id) {
-      const newBranch = { id: res.id, title: "Новая ветка", icon: "Star", color: "#c0a830", description: "", sort_order: 99, quests: [] };
+      const newBranch = { id: res.id, title: "Новый раздел", icon: "Landmark", color: "#c0a830", description: "", sort_order: 99, quests: [] };
       setActiveBranch(newBranch);
       setEditingBranch(newBranch);
       setBranchForm(newBranch);
@@ -114,7 +114,7 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
   });
 
   const removeBranch = (b: Branch) => {
-    if (!confirm(`Удалить ветку «${b.title}» со всеми квестами?`)) return;
+    if (!confirm(`Удалить раздел «${b.title}» со всеми поручениями?`)) return;
     withLoad(async () => {
       await apiFetch("/branches/remove", { method: "POST", body: JSON.stringify({ id: b.id }) }, adminKey);
       setActiveBranch(null);
@@ -123,7 +123,7 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
 
   const addQuest = () => {
     if (!activeBranch) return;
-    const q: Partial<Quest> = { title: "Новый квест", description: "", reward: "", xp: 0, rarity: "common", icon: "Star", sort_order: 99 };
+    const q: Partial<Quest> = { title: "Новое поручение", description: "", reward: "", xp: 0, rarity: "common", icon: "FileText", sort_order: 99 };
     setEditingQuest({ ...q, id: 0 } as Quest);
     setForm(q);
   };
@@ -139,7 +139,7 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
   });
 
   const removeQuest = (q: Quest) => {
-    if (!confirm(`Удалить квест «${q.title}»?`)) return;
+    if (!confirm(`Удалить поручение «${q.title}»?`)) return;
     withLoad(async () => {
       await apiFetch("/quests/remove", { method: "POST", body: JSON.stringify({ id: q.id }) }, adminKey);
     });
@@ -206,13 +206,13 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
       <div className="w-72 border-r flex flex-col" style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--card))" }}>
         <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: "hsl(var(--border))" }}>
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-md flex items-center justify-center border flex-shrink-0"
-              style={{ background: "hsl(var(--quest-brown))", borderColor: "hsl(var(--quest-gold) / 0.35)" }}>
-              <Icon name="Settings" size={17} color="hsl(var(--quest-gold))" />
+            <div className="w-9 h-9 rounded-sm flex items-center justify-center border flex-shrink-0"
+              style={{ background: "hsl(var(--quest-navy))", borderColor: "hsl(var(--quest-gold) / 0.35)" }}>
+              <Icon name="Landmark" size={17} color="hsl(var(--quest-gold))" />
             </div>
             <div>
-              <h2 className="font-cinzel text-sm font-bold" style={{ color: "hsl(var(--quest-gold))" }}>Панель управления</h2>
-              <p className="font-crimson text-xs text-muted-foreground italic">Книга квестов RPM</p>
+              <h2 className="font-cinzel text-sm font-bold" style={{ color: "hsl(var(--quest-gold))" }}>Ведомство</h2>
+              <p className="font-crimson text-xs text-muted-foreground italic">Реестр поручений RPM</p>
             </div>
           </div>
           <button className="p-1.5 rounded-md hover:bg-secondary transition-colors" onClick={onClose} title="Закрыть">
@@ -222,9 +222,9 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
 
         <div className="grid grid-cols-3 gap-px border-b" style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--border))" }}>
           {[
-            { icon: "FolderTree", value: totalBranches, label: "веток" },
-            { icon: "ScrollText", value: totalQuests, label: "квестов" },
-            { icon: "Users", value: totalPlayers || "—", label: "игроков" },
+            { icon: "FolderTree", value: totalBranches, label: "разделов" },
+            { icon: "FileText", value: totalQuests, label: "поручений" },
+            { icon: "Users", value: totalPlayers || "—", label: "граждан" },
           ].map(stat => (
             <div key={stat.label} className="flex flex-col items-center py-3 gap-0.5" style={{ background: "hsl(var(--card))" }}>
               <Icon name={stat.icon} size={14} color="hsl(var(--quest-gold) / 0.7)" />
@@ -251,25 +251,25 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
             className="flex-1 py-3 font-oswald text-xs tracking-widest uppercase transition-colors flex items-center justify-center gap-1.5"
             style={{ color: activeTab === "quests" ? "hsl(var(--quest-gold))" : "hsl(var(--muted-foreground))", borderBottom: activeTab === "quests" ? "2px solid hsl(var(--quest-gold))" : "2px solid transparent", background: activeTab === "quests" ? "hsl(var(--quest-gold) / 0.05)" : "transparent" }}
             onClick={() => setActiveTab("quests")}>
-            <Icon name="ScrollText" size={14} />
-            Квесты
+            <Icon name="FileText" size={14} />
+            Поручения
           </button>
           <button
             className="flex-1 py-3 font-oswald text-xs tracking-widest uppercase transition-colors flex items-center justify-center gap-1.5"
             style={{ color: activeTab === "players" ? "hsl(var(--quest-gold))" : "hsl(var(--muted-foreground))", borderBottom: activeTab === "players" ? "2px solid hsl(var(--quest-gold))" : "2px solid transparent", background: activeTab === "players" ? "hsl(var(--quest-gold) / 0.05)" : "transparent" }}
             onClick={() => setActiveTab("players")}>
             <Icon name="Users" size={14} />
-            Игроки
+            Граждане
           </button>
         </div>
 
         {activeTab === "quests" && (
           <div className="flex-1 overflow-y-auto p-3">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-oswald text-[10px] tracking-widest uppercase text-muted-foreground">Ветки квестов</span>
-              <button className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-secondary transition-colors" onClick={addBranch} disabled={loading} title="Добавить ветку">
+              <span className="font-oswald text-[10px] tracking-widest uppercase text-muted-foreground">Разделы реестра</span>
+              <button className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-secondary transition-colors" onClick={addBranch} disabled={loading} title="Добавить раздел">
                 <Icon name="Plus" size={13} color="hsl(var(--quest-gold))" />
-                <span className="font-oswald text-[10px] tracking-wider uppercase" style={{ color: "hsl(var(--quest-gold))" }}>Ветка</span>
+                <span className="font-oswald text-[10px] tracking-wider uppercase" style={{ color: "hsl(var(--quest-gold))" }}>Раздел</span>
               </button>
             </div>
             {branches.map((b, idx) => {
@@ -297,7 +297,7 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="font-cinzel text-sm font-semibold truncate block leading-tight">{b.title}</span>
-                  <span className="font-oswald text-[9px] tracking-wider uppercase text-muted-foreground">{bqTotal} {bqTotal === 1 ? "квест" : bqTotal < 5 ? "квеста" : "квестов"}</span>
+                  <span className="font-oswald text-[9px] tracking-wider uppercase text-muted-foreground">{bqTotal} {bqTotal === 1 ? "поручение" : bqTotal < 5 ? "поручения" : "поручений"}</span>
                 </div>
                 <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                   <button className="p-1 rounded hover:bg-background" onClick={e => { e.stopPropagation(); startEditBranch(b); }} title="Редактировать">
@@ -313,7 +313,7 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
             {branches.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 <Icon name="FolderPlus" size={28} color="hsl(var(--muted-foreground))" />
-                <p className="font-crimson text-xs mt-2 italic">Создайте первую ветку</p>
+                <p className="font-crimson text-xs mt-2 italic">Создайте первый раздел</p>
               </div>
             )}
           </div>
@@ -326,7 +326,7 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
                 <input
                   className="w-full bg-background border rounded-md px-2 py-2 pl-8 font-crimson text-sm outline-none"
                   style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))" }}
-                  placeholder="Поиск игрока..."
+                  placeholder="Поиск гражданина..."
                   value={playerSearch}
                   onChange={e => setPlayerSearch(e.target.value)}
                 />
@@ -340,7 +340,7 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
             ) : filteredPlayers.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Icon name="UserX" size={28} color="hsl(var(--muted-foreground))" />
-                <p className="font-crimson text-xs mt-2 italic">{playerSearch ? "Игроки не найдены" : "Пока нет игроков"}</p>
+                <p className="font-crimson text-xs mt-2 italic">{playerSearch ? "Граждане не найдены" : "Пока нет граждан"}</p>
               </div>
             ) : (
               filteredPlayers.map(p => {
@@ -413,7 +413,7 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
                         style={{ width: `${totalQuests > 0 ? Math.round((playerProgress.length / totalQuests) * 100) : 0}%` }} />
                     </div>
                     <span className="font-oswald text-xs text-muted-foreground tracking-wider whitespace-nowrap">
-                      {playerProgress.length}/{totalQuests} квестов
+                      {playerProgress.length}/{totalQuests} поручений
                     </span>
                   </div>
                 </div>
@@ -467,7 +467,7 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
                                 </span>
                                 <span className="font-oswald text-[10px] tracking-widest uppercase px-1.5 py-0.5 rounded inline-block mt-0.5"
                                   style={{ background: "hsl(var(--muted) / 0.5)", color: "hsl(var(--muted-foreground))" }}>
-                                  {quest.rarity === "common" ? "Обычный" : quest.rarity === "rare" ? "Редкий" : "Легендарный"}
+                                  {quest.rarity === "common" ? "Стандартное" : quest.rarity === "rare" ? "Важное" : "Особой важности"}
                                 </span>
                               </div>
                               <span className="font-oswald text-[9px] tracking-widest uppercase px-2 py-1 rounded-md flex-shrink-0 border transition-colors"
@@ -476,13 +476,13 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
                                   borderColor: isCompleted ? "hsl(var(--quest-green) / 0.4)" : "hsl(var(--border))",
                                   background: isCompleted ? "hsl(var(--quest-green) / 0.1)" : "transparent",
                                 }}>
-                                {isCompleted ? "Выдан" : "Выдать"}
+                                {isCompleted ? "Заверено" : "Заверить"}
                               </span>
                             </div>
                           );
                         })}
                         {bq.length === 0 && (
-                          <p className="font-crimson text-xs text-muted-foreground italic pl-9">Нет квестов</p>
+                          <p className="font-crimson text-xs text-muted-foreground italic pl-9">Нет поручений</p>
                         )}
                       </div>
                     </div>
@@ -498,8 +498,8 @@ export default function AdminPanel({ branches, adminKey, onRefresh, onClose }: A
                   style={{ background: "hsl(var(--quest-brown))", borderColor: "hsl(var(--quest-gold) / 0.2)" }}>
                   <Icon name="UserSearch" size={30} color="hsl(var(--quest-gold) / 0.6)" />
                 </div>
-                <p className="font-cinzel text-lg font-semibold" style={{ color: "hsl(var(--foreground))" }}>Выберите игрока</p>
-                <p className="font-crimson text-sm italic mt-1">Слева — список игроков и их прогресс</p>
+                <p className="font-cinzel text-lg font-semibold" style={{ color: "hsl(var(--foreground))" }}>Выберите гражданина</p>
+                <p className="font-crimson text-sm italic mt-1">Слева — список граждан и их досье</p>
               </div>
             </div>
           )}
