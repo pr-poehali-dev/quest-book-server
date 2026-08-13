@@ -4,57 +4,59 @@
 
 @layer base {
   :root {
-    --background: 218 32% 9%;
-    --foreground: 210 25% 88%;
+    --background: 80 12% 8%;
+    --foreground: 60 18% 86%;
 
-    --card: 218 28% 12%;
-    --card-foreground: 210 25% 88%;
+    --card: 80 12% 11%;
+    --card-foreground: 60 18% 86%;
 
-    --popover: 218 28% 12%;
-    --popover-foreground: 210 25% 88%;
+    --popover: 80 12% 11%;
+    --popover-foreground: 60 18% 86%;
 
-    --primary: 42 65% 55%;
-    --primary-foreground: 218 32% 9%;
+    --primary: 45 60% 52%;
+    --primary-foreground: 80 14% 8%;
 
-    --secondary: 218 22% 18%;
-    --secondary-foreground: 210 22% 80%;
+    --secondary: 80 10% 17%;
+    --secondary-foreground: 60 14% 78%;
 
-    --muted: 218 20% 15%;
-    --muted-foreground: 214 14% 58%;
+    --muted: 80 8% 14%;
+    --muted-foreground: 70 10% 55%;
 
-    --accent: 210 40% 32%;
-    --accent-foreground: 210 25% 90%;
+    --accent: 75 30% 28%;
+    --accent-foreground: 60 18% 88%;
 
-    --destructive: 0 62% 45%;
-    --destructive-foreground: 210 25% 90%;
+    --destructive: 0 62% 44%;
+    --destructive-foreground: 60 18% 88%;
 
-    --border: 216 22% 22%;
-    --input: 216 22% 22%;
-    --ring: 42 65% 55%;
+    --border: 78 14% 20%;
+    --input: 78 14% 20%;
+    --ring: 45 60% 52%;
 
-    --radius: 0.25rem;
+    --radius: 0.125rem;
 
-    /* Government / official registry theme */
-    --quest-gold: 42 65% 55%;
-    --quest-gold-dark: 40 50% 40%;
-    --quest-brown: 216 30% 18%;
-    --quest-brown-light: 214 26% 26%;
-    --quest-green: 150 40% 34%;
-    --quest-green-bright: 150 48% 46%;
-    --quest-red: 352 62% 46%;
-    --quest-parchment: 210 22% 82%;
-    --quest-ink: 220 40% 12%;
-    --quest-navy: 218 45% 20%;
-    --quest-steel: 212 20% 45%;
+    /* Military / army theme */
+    --quest-gold: 45 60% 52%;
+    --quest-gold-dark: 42 48% 38%;
+    --quest-brown: 80 18% 16%;
+    --quest-brown-light: 78 16% 24%;
+    --quest-green: 100 38% 32%;
+    --quest-green-bright: 95 45% 45%;
+    --quest-red: 5 62% 44%;
+    --quest-parchment: 60 20% 78%;
+    --quest-ink: 80 20% 10%;
+    --quest-khaki: 62 22% 42%;
+    --quest-olive: 75 32% 24%;
+    --quest-camo: 92 16% 18%;
+    --quest-steel: 90 8% 40%;
 
-    --sidebar-background: 218 32% 8%;
-    --sidebar-foreground: 210 22% 80%;
-    --sidebar-primary: 42 65% 55%;
-    --sidebar-primary-foreground: 218 32% 9%;
-    --sidebar-accent: 218 22% 14%;
-    --sidebar-accent-foreground: 210 22% 80%;
-    --sidebar-border: 216 22% 16%;
-    --sidebar-ring: 42 65% 55%;
+    --sidebar-background: 80 12% 7%;
+    --sidebar-foreground: 60 14% 78%;
+    --sidebar-primary: 45 60% 52%;
+    --sidebar-primary-foreground: 80 14% 8%;
+    --sidebar-accent: 80 10% 13%;
+    --sidebar-accent-foreground: 60 14% 78%;
+    --sidebar-border: 78 14% 15%;
+    --sidebar-ring: 45 60% 52%;
   }
 }
 
@@ -65,17 +67,17 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: "Crimson Text", Georgia, serif;
+    font-family: "Oswald", "Crimson Text", Georgia, sans-serif;
     background-color: hsl(var(--background));
     background-image:
       radial-gradient(
-        ellipse at 20% 20%,
-        hsl(218 40% 14% / 0.8) 0%,
+        ellipse at 20% 25%,
+        hsl(80 20% 13% / 0.85) 0%,
         transparent 60%
       ),
       radial-gradient(
-        ellipse at 80% 80%,
-        hsl(212 35% 11% / 0.6) 0%,
+        ellipse at 78% 75%,
+        hsl(95 18% 11% / 0.6) 0%,
         transparent 55%
       );
   }
@@ -169,11 +171,7 @@
 }
 
 .parchment-bg {
-  background: linear-gradient(
-    135deg,
-    hsl(var(--card)) 0%,
-    hsl(218 26% 10%) 100%
-  );
+  background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(85 14% 9%) 100%);
   border: 1px solid hsl(var(--border));
   position: relative;
 }
@@ -181,7 +179,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='none'/%3E%3Ccircle cx='1' cy='1' r='0.5' fill='hsl(210,20%,40%)' opacity='0.12'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='none'/%3E%3Ccircle cx='1' cy='1' r='0.5' fill='hsl(70,18%,45%)' opacity='0.12'/%3E%3C/svg%3E");
   border-radius: inherit;
   pointer-events: none;
 }
@@ -233,7 +231,7 @@
 .tab-active {
   background: linear-gradient(
     135deg,
-    hsl(var(--quest-navy)) 0%,
+    hsl(var(--quest-olive)) 0%,
     hsl(var(--quest-brown-light)) 100%
   );
   border-color: hsl(var(--quest-gold) / 0.6) !important;
@@ -250,17 +248,17 @@
 }
 
 .badge-rare {
-  color: hsl(42 70% 62%);
-  border-color: hsl(42 65% 55% / 0.4);
-  background: hsl(42 60% 45% / 0.12);
+  color: hsl(45 70% 62%);
+  border-color: hsl(45 60% 52% / 0.4);
+  background: hsl(45 55% 42% / 0.12);
 }
 .badge-epic {
-  color: hsl(352 70% 65%);
-  border-color: hsl(352 62% 52% / 0.4);
-  background: hsl(352 55% 45% / 0.12);
+  color: hsl(5 72% 62%);
+  border-color: hsl(5 62% 48% / 0.45);
+  background: hsl(5 55% 40% / 0.14);
 }
 .badge-common {
-  color: hsl(var(--quest-steel));
+  color: hsl(var(--quest-khaki));
   border-color: hsl(var(--border));
   background: hsl(var(--muted) / 0.4);
 }
@@ -618,26 +616,26 @@ button:active:not(:disabled) {
   0%,
   100% {
     box-shadow:
-      0 0 6px hsl(352 62% 52% / 0.2),
-      inset 0 0 8px hsl(352 62% 52% / 0.03);
+      0 0 6px hsl(5 62% 48% / 0.2),
+      inset 0 0 8px hsl(5 62% 48% / 0.03);
   }
   50% {
     box-shadow:
-      0 0 18px hsl(352 62% 52% / 0.35),
-      inset 0 0 12px hsl(352 62% 52% / 0.06);
+      0 0 18px hsl(5 62% 48% / 0.35),
+      inset 0 0 12px hsl(5 62% 48% / 0.06);
   }
 }
 @keyframes rarity-rare-glow {
   0%,
   100% {
     box-shadow:
-      0 0 6px hsl(42 65% 55% / 0.15),
-      inset 0 0 6px hsl(42 65% 55% / 0.02);
+      0 0 6px hsl(45 60% 52% / 0.15),
+      inset 0 0 6px hsl(45 60% 52% / 0.02);
   }
   50% {
     box-shadow:
-      0 0 14px hsl(42 65% 55% / 0.25),
-      inset 0 0 10px hsl(42 65% 55% / 0.04);
+      0 0 14px hsl(45 60% 52% / 0.25),
+      inset 0 0 10px hsl(45 60% 52% / 0.04);
   }
 }
 @keyframes sparkle {
@@ -1104,14 +1102,50 @@ button:active:not(:disabled) {
 }
 
 /* ═══════════════════════════════════════
-   GOVERNMENT / OFFICIAL REGISTRY THEME
+   MILITARY / ARMY THEME
    ═══════════════════════════════════════ */
 
-/* Official document heading */
-.book-title {
-  font-family: "Cinzel", Georgia, serif;
+/* Stencil heading (army style) */
+.book-title,
+.stencil {
+  font-family: "Oswald", sans-serif;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Camouflage surface */
+.camo-bg {
+  background-color: hsl(var(--card));
+  background-image:
+    radial-gradient(
+      circle at 18% 28%,
+      hsl(75 22% 18% / 0.55) 0%,
+      transparent 26%
+    ),
+    radial-gradient(
+      circle at 72% 62%,
+      hsl(85 24% 15% / 0.5) 0%,
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 48% 88%,
+      hsl(95 16% 17% / 0.45) 0%,
+      transparent 26%
+    ),
+    radial-gradient(
+      circle at 90% 12%,
+      hsl(70 20% 14% / 0.5) 0%,
+      transparent 22%
+    );
+}
+
+/* Tactical grid overlay */
+.tactical-grid {
+  background-image:
+    linear-gradient(hsl(var(--quest-khaki) / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--quest-khaki) / 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 /* Seal emboss pulse */
@@ -1130,12 +1164,12 @@ button:active:not(:disabled) {
   animation: star-pulse 3.5s ease-in-out infinite;
 }
 
-/* Official divider with centered emblem */
+/* Chevron / rank-stripe divider */
 .flourish-divider {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   color: hsl(var(--quest-gold) / 0.55);
 }
 .flourish-divider::before,
@@ -1143,31 +1177,31 @@ button:active:not(:disabled) {
   content: "";
   flex: 1;
   height: 0;
-  border-top: 1px solid hsl(var(--quest-gold) / 0.4);
-  border-bottom: 1px solid hsl(var(--quest-gold) / 0.12);
+  border-top: 2px solid hsl(var(--quest-gold) / 0.35);
+  border-bottom: 1px solid hsl(var(--quest-gold) / 0.15);
 }
 
-/* Official gold seal / medallion for player avatar */
+/* Rank insignia / shoulder-board avatar */
 .wax-seal {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(
-    circle at 35% 30%,
-    hsl(45 70% 62%) 0%,
-    hsl(var(--quest-gold-dark)) 65%,
-    hsl(40 45% 30%) 100%
+  border-radius: 2px !important;
+  background: linear-gradient(
+    145deg,
+    hsl(45 65% 58%) 0%,
+    hsl(var(--quest-gold-dark)) 70%,
+    hsl(42 42% 28%) 100%
   );
-  border: 2px solid hsl(var(--quest-gold-dark));
+  border: 1px solid hsl(var(--quest-gold-dark));
   box-shadow:
-    inset 0 0 0 1px hsl(45 80% 70% / 0.3),
-    inset 0 1px 2px hsl(45 80% 78% / 0.5),
-    inset 0 -2px 3px hsl(38 50% 25% / 0.5),
-    0 2px 6px hsl(0 0% 0% / 0.4);
+    inset 0 1px 0 hsl(45 80% 76% / 0.55),
+    inset 0 -1px 0 hsl(40 45% 22% / 0.55),
+    0 2px 5px hsl(0 0% 0% / 0.45);
 }
 
-/* Embossed official seal ring (heraldic badge) */
+/* Military star emblem (unit badge) */
 .gov-seal {
   position: relative;
   display: inline-flex;
@@ -1175,44 +1209,48 @@ button:active:not(:disabled) {
   justify-content: center;
   border-radius: 9999px;
   background:
-    radial-gradient(circle at 50% 50%, hsl(var(--quest-navy)) 60%, transparent 62%),
+    radial-gradient(
+      circle at 50% 50%,
+      hsl(var(--quest-olive)) 62%,
+      transparent 64%
+    ),
     repeating-conic-gradient(
-      hsl(var(--quest-gold) / 0.55) 0deg 6deg,
-      transparent 6deg 12deg
+      hsl(var(--quest-gold) / 0.5) 0deg 8deg,
+      transparent 8deg 16deg
     );
-  border: 2px solid hsl(var(--quest-gold) / 0.7);
+  border: 2px solid hsl(var(--quest-gold) / 0.65);
   box-shadow:
-    inset 0 0 0 4px hsl(var(--card)),
-    inset 0 0 0 5px hsl(var(--quest-gold) / 0.5),
-    0 0 24px hsl(var(--quest-gold) / 0.15),
+    inset 0 0 0 4px hsl(var(--quest-camo)),
+    inset 0 0 0 5px hsl(var(--quest-gold) / 0.45),
+    0 0 24px hsl(var(--quest-gold) / 0.14),
     0 6px 20px hsl(0 0% 0% / 0.5);
 }
 
-/* "CLASSIFIED"-style official stamp */
+/* "СЕКРЕТНО" military stamp */
 .official-stamp {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
   font-family: "Oswald", sans-serif;
-  font-weight: 600;
-  letter-spacing: 0.18em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   font-size: 10px;
   color: hsl(var(--quest-red));
-  border: 1.5px solid hsl(var(--quest-red) / 0.7);
-  border-radius: 2px;
-  transform: rotate(-3deg);
+  border: 2px solid hsl(var(--quest-red) / 0.7);
+  border-radius: 1px;
+  transform: rotate(-5deg);
   opacity: 0.9;
 }
 
-/* Official red status ribbon */
+/* Rank ribbon bar */
 .ribbon {
   position: relative;
   background: linear-gradient(
     180deg,
     hsl(var(--quest-red)) 0%,
-    hsl(352 55% 36%) 100%
+    hsl(5 55% 34%) 100%
   );
   box-shadow: 0 2px 6px hsl(0 0% 0% / 0.35);
 }
@@ -1224,24 +1262,50 @@ button:active:not(:disabled) {
   right: 0;
   height: 6px;
   background:
-    linear-gradient(45deg, hsl(352 55% 36%) 50%, transparent 50%),
-    linear-gradient(-45deg, hsl(352 55% 36%) 50%, transparent 50%);
+    linear-gradient(45deg, hsl(5 55% 34%) 50%, transparent 50%),
+    linear-gradient(-45deg, hsl(5 55% 34%) 50%, transparent 50%);
   background-size: 50% 100%;
   background-repeat: no-repeat;
   background-position: left, right;
 }
 
-/* Official steel button */
+/* Riveted metal plate edge */
+.riveted {
+  position: relative;
+}
+.riveted::before,
+.riveted::after {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: hsl(var(--quest-gold) / 0.55);
+  box-shadow:
+    0 0 4px hsl(var(--quest-gold) / 0.3),
+    inset 0 1px 1px hsl(0 0% 0% / 0.4);
+  pointer-events: none;
+}
+.riveted::before {
+  top: 6px;
+  left: 6px;
+}
+.riveted::after {
+  bottom: 6px;
+  right: 6px;
+}
+
+/* Olive field button */
 .btn-book {
   background: linear-gradient(
     180deg,
     hsl(var(--quest-brown-light)) 0%,
-    hsl(var(--quest-brown)) 100%
+    hsl(var(--quest-olive)) 100%
   );
-  border: 1px solid hsl(var(--quest-gold) / 0.3);
+  border: 1px solid hsl(var(--quest-khaki) / 0.45);
   color: hsl(var(--foreground));
   box-shadow:
-    inset 0 1px 0 hsl(210 40% 60% / 0.15),
+    inset 0 1px 0 hsl(var(--quest-khaki) / 0.28),
     inset 0 -1px 0 hsl(0 0% 0% / 0.4),
     0 2px 6px hsl(0 0% 0% / 0.3);
   transition: all 0.25s;
@@ -1249,7 +1313,7 @@ button:active:not(:disabled) {
 .btn-book:hover:not(:disabled) {
   border-color: hsl(var(--quest-gold) / 0.55);
   box-shadow:
-    inset 0 1px 0 hsl(210 40% 60% / 0.2),
+    inset 0 1px 0 hsl(var(--quest-khaki) / 0.35),
     0 0 14px hsl(var(--quest-gold) / 0.12),
     0 2px 10px hsl(0 0% 0% / 0.4);
 }
@@ -1277,7 +1341,7 @@ button:active:not(:disabled) {
     0 0 26px hsl(var(--quest-gold) / 0.3);
 }
 
-/* Official document surface (fine ruled / watermark) */
+/* Field-manual surface (ruled paper + camo blotches) */
 .paper-texture::before {
   content: "";
   position: absolute;
@@ -1288,14 +1352,14 @@ button:active:not(:disabled) {
   background-image:
     repeating-linear-gradient(
       0deg,
-      hsl(210 30% 50% / 0.03) 0px,
-      hsl(210 30% 50% / 0.03) 1px,
+      hsl(70 25% 45% / 0.03) 0px,
+      hsl(70 25% 45% / 0.03) 1px,
       transparent 1px,
       transparent 22px
     ),
     radial-gradient(
       circle at 85% 80%,
-      hsl(210 30% 45% / 0.05) 0%,
+      hsl(85 25% 40% / 0.05) 0%,
       transparent 30%
     );
 }

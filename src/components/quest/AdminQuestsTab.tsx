@@ -71,7 +71,7 @@ export default function AdminQuestsTab({
         <div className="border-b p-4 flex items-end gap-3 flex-wrap animate-fade-in"
           style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--card))" }}>
           <div>
-            <label className="block font-oswald text-[10px] tracking-wider uppercase text-muted-foreground mb-1">Название раздела</label>
+            <label className="block font-oswald text-[10px] tracking-wider uppercase text-muted-foreground mb-1">Название операции</label>
             <input className="bg-background border rounded px-2 py-1.5 font-crimson text-sm outline-none w-44"
               style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))" }}
               value={branchForm.title ?? ""} onChange={e => setBranchForm(p => ({ ...p, title: e.target.value }))} />
@@ -126,7 +126,7 @@ export default function AdminQuestsTab({
               <button className="btn-book-gold flex items-center gap-2 px-4 py-2 rounded-md font-cinzel text-sm font-semibold tracking-wide transition-all"
                 onClick={onAddQuest}>
                 <Icon name="Plus" size={15} color="hsl(var(--primary-foreground))" />
-Внести поручение
+Поставить задачу
               </button>
             </div>
 
@@ -192,9 +192,9 @@ export default function AdminQuestsTab({
               ))}
               {quests.length === 0 && editingQuest?.id !== 0 && (
                 <div className="text-center py-12 text-muted-foreground">
-                  <Icon name="ScrollText" size={40} color="hsl(var(--muted-foreground))" />
-                  <p className="font-crimson text-sm mt-3 italic">В этом разделе пока нет поручений</p>
-                  <p className="font-crimson text-xs mt-1 text-muted-foreground/70">Нажмите «Внести поручение», чтобы создать первое</p>
+                  <Icon name="Crosshair" size={40} color="hsl(var(--muted-foreground))" />
+                  <p className="font-crimson text-sm mt-3 italic">В этой операции пока нет задач</p>
+                  <p className="font-crimson text-xs mt-1 text-muted-foreground/70">Нажмите «Поставить задачу», чтобы создать первую</p>
                 </div>
               )}
             </div>
@@ -204,10 +204,10 @@ export default function AdminQuestsTab({
             <div className="text-center text-muted-foreground">
               <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border"
                 style={{ background: "hsl(var(--quest-brown))", borderColor: "hsl(var(--quest-gold) / 0.2)" }}>
-                <Icon name="FolderOpen" size={30} color="hsl(var(--quest-gold) / 0.6)" />
+                <Icon name="Crosshair" size={30} color="hsl(var(--quest-gold) / 0.6)" />
               </div>
-              <p className="font-cinzel text-lg font-semibold" style={{ color: "hsl(var(--foreground))" }}>Выберите раздел</p>
-              <p className="font-crimson text-sm italic mt-1">Слева — разделы реестра. Или создайте новый</p>
+              <p className="font-cinzel text-lg font-semibold" style={{ color: "hsl(var(--foreground))" }}>Выберите операцию</p>
+              <p className="font-crimson text-sm italic mt-1">Слева — список операций. Или создайте новую</p>
             </div>
           </div>
         )}
